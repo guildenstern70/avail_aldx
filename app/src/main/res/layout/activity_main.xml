@@ -1,0 +1,66 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:orientation="vertical"
+    >
+
+
+    <TextView
+        android:id="@+id/benvenuto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Benvenuta, Dana!" />
+
+    <TextView
+        android:id="@+id/theotheris"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@id/benvenuto"
+        android:layout_marginTop="15dp"
+        android:text="Alessio è:" />
+
+    <TextView
+        android:id="@+id/theother_availability"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/theotheris"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="Disponibile\nancora per 10min"
+        android:background="#00C853"/>
+
+    <TextView
+        android:id="@+id/youare"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/theother_availability"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="15dp"
+        android:text="Tu sei:" />
+
+    <TextView
+        android:id="@+id/my_availability"
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/youare"
+        android:gravity="center_vertical|center_horizontal"
+        android:text="Non Disponibile"
+        android:textColor="#FFFFFF"
+        android:background="#C62828"/>
+
+    <Button
+        android:id="@+id/set_my_availabitly"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_alignParentBottom="true"
+        android:onClick="setMyAvailability"
+        android:text="Imposta il tuo stato, Dana."/>
+
+
+</RelativeLayout>
