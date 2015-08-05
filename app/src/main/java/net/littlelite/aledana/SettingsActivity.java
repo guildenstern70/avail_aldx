@@ -1,35 +1,30 @@
 package net.littlelite.aledana;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
-public class MainActivity extends Activity
+public class SettingsActivity extends Activity
 {
-
-    public final static String TAG = "MainActivity";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        Log.d(TAG, "Created MainActivity");
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_settings);
+        this.initSpinners();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        return true;
     }
 
     @Override
@@ -43,22 +38,18 @@ public class MainActivity extends Activity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings)
         {
-            this.goToSettings();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    public void setMyAvailability(View view)
+    private void initSpinners()
     {
-        Intent intent = new Intent(this, SetAvailabilityActivity.class);
-        this.startActivity(intent);
-    }
-
-    private void goToSettings()
-    {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        this.startActivity(intent);
+        Spinner spinner1 = (Spinner) findViewById(R.id.spinnerWho);
+        ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this,
+                R.array.tu_sei_array, android.R.layout.simple_spinner_item);
+        adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner1.setAdapter(adapter1);
     }
 }

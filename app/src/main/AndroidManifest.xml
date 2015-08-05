@@ -20,6 +20,14 @@
             android:name=".SetAvailabilityActivity"
             android:label="@string/title_activity_set_availability" >
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="net.littlelite.aledana.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
