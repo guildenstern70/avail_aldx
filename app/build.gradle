@@ -20,6 +20,40 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.google.code.gson:gson:2.1'
+    // BEGIN Google APIs
+    // Play Services will validate the application prior to allowing OAuth2 access.
+    compile 'com.google.android.gms:play-services:6.5+'
+    // The following lines implement maven imports as defined at:
+    // https://code.google.com/p/google-api-java-client/wiki/Setup
+    // Add the Google API client library.
+    compile('com.google.api-client:google-api-client:1.18.0-rc') {
+        // Exclude artifacts that the Android SDK/Runtime provides.
+        exclude(group: 'xpp3', module: 'xpp3')
+        exclude(group: 'org.apache.httpcomponents', module: 'httpclient')
+        exclude(group: 'junit', module: 'junit')
+        exclude(group: 'com.google.android', module: 'android')
+    }
+    // Add the Android extensions for the Google API client library.
+    // This will automatically include play services as long as you have download that library
+    // from the Android SDK manager.
+    // Add the Android extensions for the Google API client library.
+    compile('com.google.api-client:google-api-client-android:1.18.0-rc') {
+        // Exclude play services, since we're not using this yet.
+        exclude(group: 'com.google.android.gms:play-services', module: 'google-play-services')
+    }
+    // END Google APIs
+    // The following client libraries make HTTP/JSON on Android easier.
+    // Android extensions for Google HTTP Client.
+    compile('com.google.http-client:google-http-client-android:1.18.0-rc') {
+        exclude(group: 'com.google.android', module: 'android')
+    }
+    compile ('com.google.http-client:google-http-client-gson:1.18.0-rc') {
+        exclude module: 'httpclient'
+    }
+    // This is used by the Google HTTP client library.
+    compile 'com.google.guava:guava:18.0'
+
 }
