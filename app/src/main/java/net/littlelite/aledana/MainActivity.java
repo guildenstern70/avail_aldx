@@ -3,6 +3,7 @@ package net.littlelite.aledana;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -12,19 +13,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
+
+import java.io.IOException;
+
 public class MainActivity extends Activity
 {
 
     private Logic theLogic;
 
-    public final static String TAG = "MainActivity";
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        Log.d(TAG, "Created MainActivity");
+        Log.d(Logic.TAG, "Created MainActivity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -35,7 +38,10 @@ public class MainActivity extends Activity
         String username = settings.getString("User", "Dana");
         this.theLogic.setUsername(username);
 
-        Log.d(TAG, "Current user is " + this.theLogic.getUsername());
+        Log.d(Logic.TAG, "Current user is " + this.theLogic.getUsername());
+
+        // Connect to server and show server version
+        new GetServerVersiontask().execute();
 
         this.initUI();
 
@@ -104,19 +110,57 @@ public class MainActivity extends Activity
 
     private void initUI()
     {
-        Log.d(TAG, "Refreshing UI");
+        Log.d(Logic.TAG, "Refreshing UI");
         TextView welcomeText = (TextView)findViewById(R.id.benvenuto);
+        TextView theOtherIsText = (TextView)findViewById(R.id.theotheris);
         Button theButton = (Button)findViewById(R.id.set_my_availabitly);
         if (this.theLogic.getUsername().equals("Dana"))
         {
             welcomeText.setText("Benvenuta, Dana!");
+            theOtherIsText.setText("Alessio è:");
             theButton.setText("Imposta il tuo stato, Dana");
         }
         else
         {
             welcomeText.setText("Benvenuto, Alessio!");
+            theOtherIsText.setText("Dana è:");
             theButton.setText("Imposta il tuo stato, Alessio");
         }
 
+    }
+
+    private class GetServerVersiontask extends AsyncTask<Void, Void, String>
+    {
+
+        @Override
+        protected String doInBackground(Void... objects)
+        {
+            String version = "UNKNOWN";
+            Log.d(Logic.TAG, "Trying to connect to server...");
+            Aledanaapi apis = theLogic.buildRemoteServiceObject();
+
+            try
+            {
+                AledanaEndpointsAliveResponse alive = apis.alive().execute();
+                version = alive.getServerVersion();
+                Log.d(Logic.TAG, "Connected to server v."+version);
+            }
+            catch (IOException e)
+            {
+                Log.e(Logic.TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return version;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            Log.d(Logic.TAG, "OK, connected to server.");
+            TextView versionText = (TextView)findViewById(R.id.version);
+            String version = "AleDana Services API version ";
+            versionText.setText(version + result);
+        }
     }
 }

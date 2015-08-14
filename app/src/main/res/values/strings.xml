@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">AleDana</string>
     <string name="action_search">Search</string>
+    <string name="button_Imposta">Imposta</string>
     <string name="button_OK">OK</string>
     <string name="button_Cancel">Torna</string>
     <string name="saro_disponibile">Sarò disponibile:</string>

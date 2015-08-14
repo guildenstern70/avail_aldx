@@ -1,8 +1,14 @@
 package net.littlelite.aledana;
 
+import android.os.AsyncTask;
+import android.util.Log;
+
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.json.gson.GsonFactory;
+
+import java.io.IOException;
 
 
 /**
@@ -11,6 +17,7 @@ import com.google.api.client.json.gson.GsonFactory;
 public class Logic
 {
     public static final String PREFS_NAME = "MyPrefsFile";
+    public final static String TAG = "ALEDANA_LOG";
 
     private static Logic instance = null;
     private String username;
@@ -38,10 +45,11 @@ public class Logic
         this.username = username;
     }
 
-    private Aledanaapi buildRemoteServiceObject()
+    public Aledanaapi buildRemoteServiceObject()
     {
         Aledanaapi.Builder builder = new Aledanaapi.Builder(
                 AndroidHttp.newCompatibleTransport(),  new GsonFactory(), null);
+        builder.setApplicationName("aledana-ep");
         return builder.build();
 
     }
