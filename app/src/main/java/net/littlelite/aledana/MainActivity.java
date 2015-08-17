@@ -50,12 +50,23 @@ public class MainActivity extends Activity
         // Connect to server and show server version
         new GetServerVersionTask().execute();
 
+        this.initUI();
+        this.refresh();
+
+    }
+
+    private void refresh()
+    {
+        TextView textViewToBeChanged1 = (TextView)findViewById(R.id.my_availability);
+        textViewToBeChanged1.setText("...");
+        textViewToBeChanged1.setBackgroundColor(Color.LTGRAY);
+        TextView textViewToBeChanged2 = (TextView)findViewById(R.id.theother_availability);
+        textViewToBeChanged2.setText("...");
+        textViewToBeChanged2.setBackgroundColor(Color.LTGRAY);
+
         // Get availability
         new GetAvailabilityTask().execute(theLogic.getUsername());
         new GetAvailabilityTask().execute(theLogic.getTheOther());
-
-        this.initUI();
-
     }
 
     @Override
@@ -63,6 +74,7 @@ public class MainActivity extends Activity
     {
         super.onResume();
         this.initUI();
+        this.refresh();
     }
 
     @Override
@@ -86,6 +98,11 @@ public class MainActivity extends Activity
         if (id == R.id.action_settings)
         {
             this.goToSettings();
+            return true;
+        }
+        else if (id == R.id.action_refresh)
+        {
+            this.refresh();
             return true;
         }
 
@@ -119,11 +136,11 @@ public class MainActivity extends Activity
         String availType = "?";
         String availTime = "?";
 
-        if (requestCode == 10 && resultCode == RESULT_OK && data != null)
-        {
+        if (requestCode == 10 && resultCode == RESULT_OK && data != null) {
             availType = data.getStringExtra("AVAIL_TYPE");
             availTime = data.getStringExtra("AVAIL_HOURS");
             new SetAvailabilityTask().execute(availType, availTime);
+            this.refresh();
         }
 
     }
@@ -159,6 +176,7 @@ public class MainActivity extends Activity
     {
         private String resultColor;
         private String resultMessage;
+        private String timeLeft;
 
         public String getResultColor()
         {
@@ -178,6 +196,16 @@ public class MainActivity extends Activity
         public void setResultMessage(String resultMessage)
         {
             this.resultMessage = resultMessage;
+        }
+
+        public String getTimeLeft()
+        {
+            return timeLeft;
+        }
+
+        public void setTimeLeft(String timeLeft)
+        {
+            this.timeLeft = timeLeft;
         }
     }
 
@@ -205,6 +233,7 @@ public class MainActivity extends Activity
                         apis.getavailability(request).execute();
                 ar.setResultColor(getAvailResponse.getAvailColor());
                 ar.setResultMessage(getAvailResponse.getAvailMessage());
+                ar.setTimeLeft(getAvailResponse.getAvailTime());
             }
             catch (IOException e)
             {
@@ -220,6 +249,9 @@ public class MainActivity extends Activity
         {
             TextView textViewToBeChanged = null;
 
+            if (result == null)
+                return;
+
             if (theLogic.getUsername().equals(this.userRequested))  // set My Availability
             {
                 textViewToBeChanged = (TextView)findViewById(R.id.my_availability);
@@ -234,7 +266,7 @@ public class MainActivity extends Activity
                 textViewToBeChanged.setTextColor(Color.parseColor("#FFFFFF"));
                 textViewToBeChanged.setBackgroundColor(Color.parseColor("#00C853"));
             }
-            else if (result.getResultColor() == "yellow")
+            else if (result.getResultColor().equals("yellow"))
             {
                 textViewToBeChanged.setBackgroundColor(Color.YELLOW);
             }
@@ -245,7 +277,13 @@ public class MainActivity extends Activity
                 textViewToBeChanged.setBackgroundColor(Color.parseColor("#C62828"));
             }
 
-            textViewToBeChanged.setText(result.getResultMessage());
+            String text = result.getResultMessage();
+            if (result.getTimeLeft() != null) {
+                text += "\n";
+                text += "Ancora per ";
+                text += result.getTimeLeft();
+            }
+            textViewToBeChanged.setText(text);
 
         }
 
