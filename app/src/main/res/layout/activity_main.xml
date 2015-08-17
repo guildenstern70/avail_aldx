@@ -30,8 +30,8 @@
         android:layout_marginTop="5dp"
         android:layout_below="@id/theotheris"
         android:gravity="center_vertical|center_horizontal"
-        android:text="Disponibile\nancora per 10min"
-        android:background="#00C853"/>
+        android:text="..."
+        android:background="#EEEEEE"/>
 
     <TextView
         android:id="@+id/youare"
@@ -49,16 +49,15 @@
         android:layout_marginTop="5dp"
         android:layout_below="@id/youare"
         android:gravity="center_vertical|center_horizontal"
-        android:text="Non Disponibile"
-        android:textColor="#FFFFFF"
-        android:background="#C62828"/>
+        android:text="..."
+        android:background="#EEEEEE"/>
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="AleDana Services API version ?.?"
+        android:text="Connecting to server..."
         android:id="@+id/version"
         android:layout_alignParentBottom="true"
         android:layout_toEndOf="@+id/theotheris" />
@@ -71,8 +70,6 @@
         android:onClick="setMyAvailability"
         android:layout_above="@id/version"
         android:text="Imposta il tuo stato, Dana."/>
-
-
 
 
 </RelativeLayout>

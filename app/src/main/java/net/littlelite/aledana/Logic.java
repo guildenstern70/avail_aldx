@@ -40,6 +40,13 @@ public class Logic
         return this.username;
     }
 
+    public String getTheOther()
+    {
+        if (this.username.equals("Alessio"))
+            return "Dana";
+        return "Alessio";
+    }
+
     public void setUsername(String username)
     {
         this.username = username;

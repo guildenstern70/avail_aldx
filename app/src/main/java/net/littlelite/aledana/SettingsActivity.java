@@ -57,8 +57,6 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
     protected void onStop()
     {
         super.onStop();
-
-
     }
 
     private void initSpinners()

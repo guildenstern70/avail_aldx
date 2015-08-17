@@ -1,8 +1,10 @@
 package net.littlelite.aledana;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,9 +14,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityRequest;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityResponse;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetAvailabilityRequest;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetAvailabilityResponse;
 
 import java.io.IOException;
 
@@ -41,7 +48,11 @@ public class MainActivity extends Activity
         Log.d(Logic.TAG, "Current user is " + this.theLogic.getUsername());
 
         // Connect to server and show server version
-        new GetServerVersiontask().execute();
+        new GetServerVersionTask().execute();
+
+        // Get availability
+        new GetAvailabilityTask().execute(theLogic.getUsername());
+        new GetAvailabilityTask().execute(theLogic.getTheOther());
 
         this.initUI();
 
@@ -99,7 +110,22 @@ public class MainActivity extends Activity
     public void setMyAvailability(View view)
     {
         Intent intent = new Intent(this, SetAvailabilityActivity.class);
-        this.startActivity(intent);
+        this.startActivityForResult(intent, 10);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+
+        String availType = "?";
+        String availTime = "?";
+
+        if (requestCode == 10 && resultCode == RESULT_OK && data != null)
+        {
+            availType = data.getStringExtra("AVAIL_TYPE");
+            availTime = data.getStringExtra("AVAIL_HOURS");
+            new SetAvailabilityTask().execute(availType, availTime);
+        }
+
     }
 
     private void goToSettings()
@@ -129,14 +155,184 @@ public class MainActivity extends Activity
 
     }
 
-    private class GetServerVersiontask extends AsyncTask<Void, Void, String>
+    private class AvailabilityResult
+    {
+        private String resultColor;
+        private String resultMessage;
+
+        public String getResultColor()
+        {
+            return resultColor;
+        }
+
+        public void setResultColor(String resultColor)
+        {
+            this.resultColor = resultColor;
+        }
+
+        public String getResultMessage()
+        {
+            return resultMessage;
+        }
+
+        public void setResultMessage(String resultMessage)
+        {
+            this.resultMessage = resultMessage;
+        }
+    }
+
+    private class GetAvailabilityTask extends AsyncTask<String, Void, AvailabilityResult>
+    {
+
+        private String userRequested;
+
+        @Override
+        protected AvailabilityResult doInBackground(String... params)
+        {
+            String username = params[0];
+            Log.d(Logic.TAG, "Trying to connect to server to get availability...");
+            Log.d(Logic.TAG, "username = " + username);
+            Aledanaapi apis = theLogic.buildRemoteServiceObject();
+            AledanaEndpointsGetAvailabilityRequest request =
+                    new AledanaEndpointsGetAvailabilityRequest();
+            this.userRequested = username;
+            request.setUsername(this.userRequested);
+            AvailabilityResult ar = new AvailabilityResult();
+
+            try
+            {
+                AledanaEndpointsGetAvailabilityResponse getAvailResponse =
+                        apis.getavailability(request).execute();
+                ar.setResultColor(getAvailResponse.getAvailColor());
+                ar.setResultMessage(getAvailResponse.getAvailMessage());
+            }
+            catch (IOException e)
+            {
+                Log.e(Logic.TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return ar;
+        }
+
+        @Override
+        protected void onPostExecute(AvailabilityResult result)
+        {
+            TextView textViewToBeChanged = null;
+
+            if (theLogic.getUsername().equals(this.userRequested))  // set My Availability
+            {
+                textViewToBeChanged = (TextView)findViewById(R.id.my_availability);
+            }
+            else
+            {
+                textViewToBeChanged = (TextView)findViewById(R.id.theother_availability);
+            }
+
+            if (result.getResultColor().equals("green"))
+            {
+                textViewToBeChanged.setTextColor(Color.parseColor("#FFFFFF"));
+                textViewToBeChanged.setBackgroundColor(Color.parseColor("#00C853"));
+            }
+            else if (result.getResultColor() == "yellow")
+            {
+                textViewToBeChanged.setBackgroundColor(Color.YELLOW);
+            }
+            else
+            {
+                //RedColor = C62828
+                textViewToBeChanged.setTextColor(Color.parseColor("#333333"));
+                textViewToBeChanged.setBackgroundColor(Color.parseColor("#C62828"));
+            }
+
+            textViewToBeChanged.setText(result.getResultMessage());
+
+        }
+
+    }
+
+    private class SetAvailabilityTask extends AsyncTask<String, Void, Boolean>
+    {
+
+        private String availType;
+        private String availUser;
+        private String availTime;
+
+        @Override
+        protected Boolean doInBackground(String... params)
+        {
+            Boolean availSet = Boolean.FALSE;
+
+            Log.d(Logic.TAG, "Trying to connect to server to set availability...");
+
+            availType = params[0];
+            availUser = theLogic.getUsername();
+            availTime = params[1];
+
+            Log.d(Logic.TAG, "User = " + availUser);
+            Log.d(Logic.TAG, "Type = " + availType);
+            Log.d(Logic.TAG, "Time = " + availTime);
+
+            Aledanaapi apis = theLogic.buildRemoteServiceObject();
+            AledanaEndpointsSetAvailabilityRequest request =
+                    new AledanaEndpointsSetAvailabilityRequest();
+            request.setAvailtype(availType);
+            request.setUsername(availUser);
+            request.setHours(availTime);
+
+            try
+            {
+                AledanaEndpointsSetAvailabilityResponse setAvailResponse =
+                        apis.setavailability(request).execute();
+                availSet = setAvailResponse.getResult();
+            }
+            catch (IOException e)
+            {
+                Log.e(Logic.TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return availSet;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result)
+        {
+            if (result == Boolean.TRUE)
+            {
+                Log.d(Logic.TAG, "OK, availability was set.");
+
+                Context context = getApplicationContext();
+                if (availTime.equals("1"))
+                {
+                    availTime = "1 ora.";
+                }
+                else
+                {
+                    availTime = availTime + "ore.";
+                }
+                CharSequence text = "Impostato: " + availType + " per " + availTime;
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+            else
+            {
+                Log.e(Logic.TAG, "Somerthing weird has happened...");
+            }
+
+        }
+
+    }
+
+    private class GetServerVersionTask extends AsyncTask<Void, Void, String>
     {
 
         @Override
         protected String doInBackground(Void... objects)
         {
             String version = "UNKNOWN";
-            Log.d(Logic.TAG, "Trying to connect to server...");
+            Log.d(Logic.TAG, "Trying to connect to server for version...");
             Aledanaapi apis = theLogic.buildRemoteServiceObject();
 
             try

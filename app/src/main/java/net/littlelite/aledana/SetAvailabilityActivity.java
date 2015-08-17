@@ -62,12 +62,18 @@ public class SetAvailabilityActivity extends Activity
 
         String availType = spinner1.getSelectedItem().toString();
         String availTime = spinner2.getSelectedItem().toString();
+        availTime = availTime.substring(0,1);
 
-        Context context = getApplicationContext();
-        CharSequence text = availType + " per " + availTime;
-        int duration = Toast.LENGTH_SHORT;
-        Toast toast = Toast.makeText(context, text, duration);
-        toast.show();
+        this.setActivityResult(availType.toLowerCase(), availTime);
+        this.finish();
+    }
+
+    private void setActivityResult(String availType, String hours)
+    {
+        Intent output = new Intent();
+        output.putExtra("AVAIL_TYPE", availType);
+        output.putExtra("AVAIL_HOURS", hours);
+        this.setResult(RESULT_OK, output);
     }
 
     public void backHome(View view)
