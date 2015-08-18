@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,9 +52,6 @@ public class MainActivity extends Activity
         // Connect to server and show server version
         new GetServerVersionTask().execute();
 
-        this.initUI();
-        this.refresh();
-
     }
 
     private void refresh()
@@ -73,6 +72,9 @@ public class MainActivity extends Activity
     protected void onResume()
     {
         super.onResume();
+
+        Log.d(Logic.TAG, "Resumed MainActivity");
+
         this.initUI();
         this.refresh();
     }
@@ -124,6 +126,13 @@ public class MainActivity extends Activity
         editor.commit();
     }
 
+    public void callTheOther(View view)
+    {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + this.theLogic.getTheOtherPhone()));
+        this.startActivity(intent);
+    }
+
     public void setMyAvailability(View view)
     {
         Intent intent = new Intent(this, SetAvailabilityActivity.class);
@@ -157,6 +166,7 @@ public class MainActivity extends Activity
         TextView welcomeText = (TextView)findViewById(R.id.benvenuto);
         TextView theOtherIsText = (TextView)findViewById(R.id.theotheris);
         Button theButton = (Button)findViewById(R.id.set_my_availabitly);
+        ImageButton callmeButton = (ImageButton)findViewById(R.id.callme_button);
         if (this.theLogic.getUsername().equals("Dana"))
         {
             welcomeText.setText("Benvenuta, Dana!");
@@ -169,7 +179,7 @@ public class MainActivity extends Activity
             theOtherIsText.setText("Dana è:");
             theButton.setText("Imposta il tuo stato, Alessio");
         }
-
+        callmeButton.setEnabled(false);
     }
 
     private class AvailabilityResult
@@ -252,6 +262,8 @@ public class MainActivity extends Activity
             if (result == null)
                 return;
 
+            ImageButton callme = (ImageButton)findViewById(R.id.callme_button);
+
             if (theLogic.getUsername().equals(this.userRequested))  // set My Availability
             {
                 textViewToBeChanged = (TextView)findViewById(R.id.my_availability);
@@ -263,25 +275,35 @@ public class MainActivity extends Activity
 
             if (result.getResultColor().equals("green"))
             {
+                callme.setImageResource(R.drawable.callme);
+                callme.setEnabled(true);
                 textViewToBeChanged.setTextColor(Color.parseColor("#FFFFFF"));
                 textViewToBeChanged.setBackgroundColor(Color.parseColor("#00C853"));
             }
             else if (result.getResultColor().equals("yellow"))
             {
-                textViewToBeChanged.setBackgroundColor(Color.YELLOW);
+                callme.setImageResource(R.drawable.callmebn);
+                callme.setEnabled(false);
+                textViewToBeChanged.setTextColor(Color.parseColor("#111111"));
+                textViewToBeChanged.setBackgroundColor(Color.parseColor("#DBD365"));
             }
             else
             {
+                callme.setImageResource(R.drawable.callmebn);
+                callme.setEnabled(false);
                 //RedColor = C62828
                 textViewToBeChanged.setTextColor(Color.parseColor("#333333"));
                 textViewToBeChanged.setBackgroundColor(Color.parseColor("#C62828"));
             }
 
             String text = result.getResultMessage();
-            if (result.getTimeLeft() != null) {
-                text += "\n";
-                text += "Ancora per ";
-                text += result.getTimeLeft();
+            String remTime = result.getTimeLeft();
+            if (remTime != null) {
+                if (!remTime.startsWith("-")) {
+                    text += "\n";
+                    text += "Ancora per ";
+                    text += result.getTimeLeft();
+                }
             }
             textViewToBeChanged.setText(text);
 

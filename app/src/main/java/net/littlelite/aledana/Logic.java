@@ -1,5 +1,7 @@
 package net.littlelite.aledana;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -45,6 +47,14 @@ public class Logic
         if (this.username.equals("Alessio"))
             return "Dana";
         return "Alessio";
+    }
+
+    public String getTheOtherPhone()
+    {
+        String theOtherPhone = "+393484979839";
+        if (this.username.equals("Alessio"))
+            theOtherPhone = "+393355999621";
+        return theOtherPhone;
     }
 
     public void setUsername(String username)

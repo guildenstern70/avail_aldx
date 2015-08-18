@@ -11,6 +11,8 @@
         android:id="@+id/benvenuto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="#333333"
+        android:textStyle="italic"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Benvenuta, Dana!" />
 
@@ -25,13 +27,27 @@
 
     <TextView
         android:id="@+id/theother_availability"
-        android:layout_width="fill_parent"
+        android:layout_width="0dp"
         android:layout_height="200dp"
         android:layout_marginTop="5dp"
         android:layout_below="@id/theotheris"
+        android:layout_alignParentLeft="true"
         android:gravity="center_vertical|center_horizontal"
         android:text="..."
+        android:layout_toLeftOf="@id/callme_button"
         android:background="#EEEEEE"/>
+
+    <ImageButton
+        android:id="@id/callme_button"
+        android:layout_below="@id/theotheris"
+        android:layout_marginTop="1dp"
+        android:src="@drawable/callmebn"
+        android:scaleType="fitCenter"
+        android:onClick="callTheOther"
+        android:layout_alignParentRight="true"
+        android:layout_height="208dp"
+        android:layout_width="100dp">
+    </ImageButton>
 
     <TextView
         android:id="@+id/youare"
@@ -53,14 +69,14 @@
         android:background="#EEEEEE"/>
 
     <TextView
+        android:id="@+id/version"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Connecting to server..."
-        android:id="@+id/version"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/theotheris" />
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true" />
 
     <Button
         android:id="@+id/set_my_availabitly"

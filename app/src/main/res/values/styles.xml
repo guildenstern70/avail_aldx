@@ -1,3 +1,4 @@
 <resources>
     <item name="editMessaggioOpzionale" type="id"/>
+    <item name="callme_button" type="id"/>
 </resources>
