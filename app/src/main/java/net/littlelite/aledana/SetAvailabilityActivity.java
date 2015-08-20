@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -42,13 +43,13 @@ public class SetAvailabilityActivity extends Activity
 
     private void initSpinners()
     {
-        Spinner spinner1 = (Spinner)findViewById(R.id.spinnerAvailMode);
+        Spinner spinner1 = (Spinner) findViewById(R.id.spinnerAvailMode);
         ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this,
                 R.array.availability_mode, android.R.layout.simple_spinner_item);
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner1.setAdapter(adapter1);
 
-        Spinner spinner2 = (Spinner)findViewById(R.id.spinnerHowManyHours);
+        Spinner spinner2 = (Spinner) findViewById(R.id.spinnerHowManyHours);
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this,
                 R.array.availability_hours, android.R.layout.simple_spinner_item);
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -57,22 +58,28 @@ public class SetAvailabilityActivity extends Activity
 
     public void setAvailability(View view)
     {
-        Spinner spinner1 = (Spinner)findViewById(R.id.spinnerAvailMode);
-        Spinner spinner2 = (Spinner)findViewById(R.id.spinnerHowManyHours);
+        Spinner spinner1 = (Spinner) findViewById(R.id.spinnerAvailMode);
+        Spinner spinner2 = (Spinner) findViewById(R.id.spinnerHowManyHours);
 
         String availType = spinner1.getSelectedItem().toString();
         String availTime = spinner2.getSelectedItem().toString();
-        availTime = availTime.substring(0,1);
+        availTime = availTime.substring(0, 1);
 
-        this.setActivityResult(availType.toLowerCase(), availTime);
+        EditText messageText = (EditText) findViewById(R.id.editMessaggioOpzionale);
+        String lastMessage = messageText.getText().toString();
+
+        this.setActivityResult(availType.toLowerCase(), availTime, lastMessage);
         this.finish();
     }
 
-    private void setActivityResult(String availType, String hours)
+    private void setActivityResult(String availType, String hours, String message)
     {
+        if (message == null)
+            message = "";
         Intent output = new Intent();
         output.putExtra("AVAIL_TYPE", availType);
         output.putExtra("AVAIL_HOURS", hours);
+        output.putExtra("AVAIL_MESSAGE", message);
         this.setResult(RESULT_OK, output);
     }
 

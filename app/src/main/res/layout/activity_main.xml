@@ -23,7 +23,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_below="@id/benvenuto"
         android:layout_marginTop="15dp"
-        android:text="Alessio è:" />
+        android:text="A. è:" />
 
     <TextView
         android:id="@+id/theother_availability"

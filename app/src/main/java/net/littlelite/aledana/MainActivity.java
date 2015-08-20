@@ -40,6 +40,7 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         this.theLogic = Logic.getInstance();
 
         // Restore settings
@@ -52,14 +53,20 @@ public class MainActivity extends Activity
         // Connect to server and show server version
         new GetServerVersionTask().execute();
 
+        try
+        {
+            getActionBar().setDisplayShowTitleEnabled(false);
+        }
+        catch (NullPointerException nx) {}
+
     }
 
     private void refresh()
     {
-        TextView textViewToBeChanged1 = (TextView)findViewById(R.id.my_availability);
+        TextView textViewToBeChanged1 = (TextView) findViewById(R.id.my_availability);
         textViewToBeChanged1.setText("...");
         textViewToBeChanged1.setBackgroundColor(Color.LTGRAY);
-        TextView textViewToBeChanged2 = (TextView)findViewById(R.id.theother_availability);
+        TextView textViewToBeChanged2 = (TextView) findViewById(R.id.theother_availability);
         textViewToBeChanged2.setText("...");
         textViewToBeChanged2.setBackgroundColor(Color.LTGRAY);
 
@@ -123,7 +130,7 @@ public class MainActivity extends Activity
         editor.putString("User", this.theLogic.getUsername());
 
         // Commit the edits!
-        editor.commit();
+        editor.apply();
     }
 
     public void callTheOther(View view)
@@ -144,11 +151,14 @@ public class MainActivity extends Activity
 
         String availType = "?";
         String availTime = "?";
+        String availMessage = "";
 
-        if (requestCode == 10 && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 10 && resultCode == RESULT_OK && data != null)
+        {
             availType = data.getStringExtra("AVAIL_TYPE");
             availTime = data.getStringExtra("AVAIL_HOURS");
-            new SetAvailabilityTask().execute(availType, availTime);
+            availMessage = data.getStringExtra("AVAIL_MESSAGE");
+            new SetAvailabilityTask().execute(availType, availTime, availMessage);
             this.refresh();
         }
 
@@ -163,20 +173,20 @@ public class MainActivity extends Activity
     private void initUI()
     {
         Log.d(Logic.TAG, "Refreshing UI");
-        TextView welcomeText = (TextView)findViewById(R.id.benvenuto);
-        TextView theOtherIsText = (TextView)findViewById(R.id.theotheris);
-        Button theButton = (Button)findViewById(R.id.set_my_availabitly);
-        ImageButton callmeButton = (ImageButton)findViewById(R.id.callme_button);
+        TextView welcomeText = (TextView) findViewById(R.id.benvenuto);
+        TextView theOtherIsText = (TextView) findViewById(R.id.theotheris);
+        Button theButton = (Button) findViewById(R.id.set_my_availabitly);
+        ImageButton callmeButton = (ImageButton) findViewById(R.id.callme_button);
         if (this.theLogic.getUsername().equals("Dana"))
         {
             welcomeText.setText("Benvenuta, Dana!");
-            theOtherIsText.setText("Alessio è:");
+            theOtherIsText.setText("A. è:");
             theButton.setText("Imposta il tuo stato, Dana");
         }
         else
         {
             welcomeText.setText("Benvenuto, Alessio!");
-            theOtherIsText.setText("Dana è:");
+            theOtherIsText.setText("D. è:");
             theButton.setText("Imposta il tuo stato, Alessio");
         }
         callmeButton.setEnabled(false);
@@ -185,6 +195,7 @@ public class MainActivity extends Activity
     private class AvailabilityResult
     {
         private String resultColor;
+        private String resultDescription;
         private String resultMessage;
         private String timeLeft;
 
@@ -217,6 +228,16 @@ public class MainActivity extends Activity
         {
             this.timeLeft = timeLeft;
         }
+
+        public String getResultDescription()
+        {
+            return resultDescription;
+        }
+
+        public void setResultDescription(String resultDescription)
+        {
+            this.resultDescription = resultDescription;
+        }
     }
 
     private class GetAvailabilityTask extends AsyncTask<String, Void, AvailabilityResult>
@@ -242,6 +263,7 @@ public class MainActivity extends Activity
                 AledanaEndpointsGetAvailabilityResponse getAvailResponse =
                         apis.getavailability(request).execute();
                 ar.setResultColor(getAvailResponse.getAvailColor());
+                ar.setResultDescription(getAvailResponse.getAvailDescription());
                 ar.setResultMessage(getAvailResponse.getAvailMessage());
                 ar.setTimeLeft(getAvailResponse.getAvailTime());
             }
@@ -262,15 +284,16 @@ public class MainActivity extends Activity
             if (result == null)
                 return;
 
-            ImageButton callme = (ImageButton)findViewById(R.id.callme_button);
+            ImageButton callme = (ImageButton) findViewById(R.id.callme_button);
+            boolean isChangingMyAvailability = theLogic.getUsername().equals(this.userRequested);
 
-            if (theLogic.getUsername().equals(this.userRequested))  // set My Availability
+            if (isChangingMyAvailability)
             {
-                textViewToBeChanged = (TextView)findViewById(R.id.my_availability);
+                textViewToBeChanged = (TextView) findViewById(R.id.my_availability);
             }
             else
             {
-                textViewToBeChanged = (TextView)findViewById(R.id.theother_availability);
+                textViewToBeChanged = (TextView) findViewById(R.id.theother_availability);
             }
 
             if (result.getResultColor().equals("green"))
@@ -296,13 +319,28 @@ public class MainActivity extends Activity
                 textViewToBeChanged.setBackgroundColor(Color.parseColor("#C62828"));
             }
 
-            String text = result.getResultMessage();
+            String text = result.getResultDescription();
             String remTime = result.getTimeLeft();
-            if (remTime != null) {
-                if (!remTime.startsWith("-")) {
+            String message = result.getResultMessage();
+            if (remTime != null)
+            {
+                if (!remTime.startsWith("-"))
+                {
                     text += "\n";
                     text += "Ancora per ";
-                    text += result.getTimeLeft();
+                    text += result.getTimeLeft().substring(0, 6);
+                }
+            }
+            if (message != null)
+            {
+                if (!isChangingMyAvailability)
+                {
+                    if (!message.equals(""))
+                    {
+                        text += "\n\n\"";
+                        text += message;
+                        text += "\"";
+                    }
                 }
             }
             textViewToBeChanged.setText(text);
@@ -317,6 +355,7 @@ public class MainActivity extends Activity
         private String availType;
         private String availUser;
         private String availTime;
+        private String availMessage;
 
         @Override
         protected Boolean doInBackground(String... params)
@@ -328,10 +367,12 @@ public class MainActivity extends Activity
             availType = params[0];
             availUser = theLogic.getUsername();
             availTime = params[1];
+            availMessage = params[2];
 
             Log.d(Logic.TAG, "User = " + availUser);
             Log.d(Logic.TAG, "Type = " + availType);
             Log.d(Logic.TAG, "Time = " + availTime);
+            Log.d(Logic.TAG, "Msg = " + availMessage);
 
             Aledanaapi apis = theLogic.buildRemoteServiceObject();
             AledanaEndpointsSetAvailabilityRequest request =
@@ -339,6 +380,7 @@ public class MainActivity extends Activity
             request.setAvailtype(availType);
             request.setUsername(availUser);
             request.setHours(availTime);
+            request.setMessage(availMessage);
 
             try
             {
@@ -399,7 +441,7 @@ public class MainActivity extends Activity
             {
                 AledanaEndpointsAliveResponse alive = apis.alive().execute();
                 version = alive.getServerVersion();
-                Log.d(Logic.TAG, "Connected to server v."+version);
+                Log.d(Logic.TAG, "Connected to server v." + version);
             }
             catch (IOException e)
             {
@@ -414,8 +456,8 @@ public class MainActivity extends Activity
         protected void onPostExecute(String result)
         {
             Log.d(Logic.TAG, "OK, connected to server.");
-            TextView versionText = (TextView)findViewById(R.id.version);
-            String version = "AleDana Services API version ";
+            TextView versionText = (TextView) findViewById(R.id.version);
+            String version = "AeD Services API v. ";
             versionText.setText(version + result);
         }
     }

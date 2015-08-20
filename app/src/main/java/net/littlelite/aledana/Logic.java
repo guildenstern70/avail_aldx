@@ -18,6 +18,9 @@ import java.io.IOException;
  */
 public class Logic
 {
+    private static final String ALE_CELL = "+393484979839";
+    private static final String DANA_CELL = "+393355999621";
+
     public static final String PREFS_NAME = "MyPrefsFile";
     public final static String TAG = "ALEDANA_LOG";
 
@@ -30,7 +33,7 @@ public class Logic
 
     public static Logic getInstance()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = new Logic();
         }
@@ -51,9 +54,9 @@ public class Logic
 
     public String getTheOtherPhone()
     {
-        String theOtherPhone = "+393484979839";
+        String theOtherPhone = ALE_CELL;
         if (this.username.equals("Alessio"))
-            theOtherPhone = "+393355999621";
+            theOtherPhone = DANA_CELL;
         return theOtherPhone;
     }
 
@@ -65,7 +68,7 @@ public class Logic
     public Aledanaapi buildRemoteServiceObject()
     {
         Aledanaapi.Builder builder = new Aledanaapi.Builder(
-                AndroidHttp.newCompatibleTransport(),  new GsonFactory(), null);
+                AndroidHttp.newCompatibleTransport(), new GsonFactory(), null);
         builder.setApplicationName("aledana-ep");
         return builder.build();
 

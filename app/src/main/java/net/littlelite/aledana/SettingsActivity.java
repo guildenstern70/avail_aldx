@@ -24,8 +24,8 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        this.initSpinners();
         this.theLogic = Logic.getInstance();
+        this.initSpinners();
     }
 
     @Override
@@ -67,6 +67,16 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner1.setAdapter(adapter1);
         spinner1.setOnItemSelectedListener(this);
+
+        String user = this.theLogic.getUsername();
+        if (user.equals("Dana"))
+        {
+            spinner1.setSelection(0);
+        }
+        else
+        {
+            spinner1.setSelection(1);
+        }
     }
 
     public void onItemSelected(AdapterView<?> parent, View view,
