@@ -308,7 +308,7 @@ public class MainActivity extends Activity
                 callme.setImageResource(R.drawable.callmebn);
                 callme.setEnabled(false);
                 textViewToBeChanged.setTextColor(Color.parseColor("#111111"));
-                textViewToBeChanged.setBackgroundColor(Color.parseColor("#DBD365"));
+                textViewToBeChanged.setBackgroundColor(Color.parseColor("#C4FAB1"));
             }
             else
             {
@@ -402,8 +402,6 @@ public class MainActivity extends Activity
         {
             if (result == Boolean.TRUE)
             {
-                Log.d(Logic.TAG, "OK, availability was set.");
-
                 Context context = getApplicationContext();
                 if (availTime.equals("1"))
                 {
@@ -411,7 +409,7 @@ public class MainActivity extends Activity
                 }
                 else
                 {
-                    availTime = availTime + "ore.";
+                    availTime = availTime + " ore.";
                 }
                 CharSequence text = "Impostato: " + availType + " per " + availTime;
                 int duration = Toast.LENGTH_SHORT;

@@ -11,27 +11,45 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView" />
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinnerAvailMode"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true" />
+    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/radGroup"
+                android:layout_marginTop="20dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView"
+                android:orientation="vertical">
+        <RadioButton android:id="@+id/rad_item_altelefono"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="@string/rad_altelefono"/>
+        <RadioButton android:id="@+id/rad_item_whatsapp"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="@string/rad_whatsapp"/>
+        <RadioButton android:id="@+id/rad_item_nondisponibile"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text="@string/rad_nonsonodisponibile"/>
+    </RadioGroup>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:text="@string/per_le_prox"
         android:id="@+id/textProssime"
-        android:layout_below="@+id/spinnerAvailMode"
+        android:layout_below="@id/radGroup"
         android:layout_alignParentStart="true" />
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinnerHowManyHours"
+    <SeekBar
+        android:id="@+id/seekHowManyHours"
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:max="4"
         android:layout_below="@+id/textProssime"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -40,7 +58,7 @@
         android:text="@string/messaggio_opz"
         android:labelFor="@id/editMessaggioOpzionale"
         android:id="@+id/textMessaggio"
-        android:layout_below="@+id/spinnerHowManyHours"
+        android:layout_below="@+id/seekHowManyHours"
         android:layout_alignParentStart="true" />
 
     <EditText
@@ -59,6 +77,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:onClick="setAvailability" />
+
 
 
 </RelativeLayout>

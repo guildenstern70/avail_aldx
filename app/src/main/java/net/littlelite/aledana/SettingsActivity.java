@@ -2,6 +2,8 @@ package net.littlelite.aledana;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 public class SettingsActivity extends Activity implements AdapterView.OnItemSelectedListener
 {
@@ -26,6 +29,17 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
         setContentView(R.layout.activity_settings);
         this.theLogic = Logic.getInstance();
         this.initSpinners();
+        TextView textVersion = (TextView)this.findViewById(R.id.textVersion);
+        try
+        {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            textVersion.setText(textVersion.getText().toString().replace("XYZ", version));
+        }
+        catch (PackageManager.NameNotFoundException nex)
+        {
+            textVersion.setText("AeD unknown version.");
+        }
     }
 
     @Override
