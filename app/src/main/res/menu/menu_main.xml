@@ -2,15 +2,19 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity">
 
     <!-- Settings, should always be in the overflow -->
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:icon="@drawable/settings"
-        android:showAsAction="ifRoom" />
-
     <item android:id="@+id/action_refresh"
         android:title="@string/action_refresh"
         android:icon="@drawable/refreshbn"
         android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_settings"
+          android:title="@string/action_settings"
+          android:icon="@drawable/settings"
+          android:showAsAction="never" />
+
+    <item android:id="@+id/action_setup"
+          android:title="@string/button_Imposta"
+          android:showAsAction="never" />
 
 
 </menu>

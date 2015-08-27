@@ -14,9 +14,6 @@ import android.widget.TextView;
 public class SetAvailabilityActivity extends Activity
 {
 
-    private static final int MIN_HOURS = 1;
-    private static final int MAX_HOURS = 5;
-
     private int howManyHours;
     private String availMode;
 
@@ -52,7 +49,7 @@ public class SetAvailabilityActivity extends Activity
         this.howManyHours = 1;
 
         // Radio group: availability mode
-        RadioGroup radGroup = (RadioGroup) findViewById(R.id.radGroup);
+        final RadioGroup radGroup = (RadioGroup) findViewById(R.id.radGroup);
         radGroup.check(R.id.rad_item_altelefono);
         radGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
@@ -70,6 +67,7 @@ public class SetAvailabilityActivity extends Activity
                         break;
                     case R.id.rad_item_nondisponibile:
                         availMode = "Non sono disponibile";
+                        howManyHours = 0;
                         break;
                 }
             }
@@ -78,7 +76,7 @@ public class SetAvailabilityActivity extends Activity
 
         // Seekbar: how many hours
         SeekBar seekbar = (SeekBar)this.findViewById(R.id.seekHowManyHours);
-        seekbar.setMax((this.MAX_HOURS - this.MIN_HOURS) / 1);
+        seekbar.setMax((Logic.MAX_HOURS - Logic.MIN_HOURS) / 1);
         seekbar.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener()
                 {
@@ -98,7 +96,7 @@ public class SetAvailabilityActivity extends Activity
                     {
                         TextView perLeProssime = (TextView) findViewById(R.id.textProssime);
                         // if progress = 13 -> value = 3 + (13 * 0.1) = 4.3
-                        double value = MIN_HOURS + (progress * 1);
+                        double value = Logic.MIN_HOURS + (progress * 1);
                         howManyHours = ((int) value);
                         StringBuilder sb = new StringBuilder();
 

@@ -1,11 +1,10 @@
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="10dp"
-    android:orientation="vertical"
-    >
 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_margin="10dp"
+              android:orientation="vertical">
 
     <TextView
         android:id="@+id/benvenuto"
@@ -14,78 +13,122 @@
         android:textColor="#333333"
         android:textStyle="italic"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Benvenuta, Dana!" />
+        android:text="Benvenuta, Dana!"
+        />
 
-    <TextView
-        android:id="@+id/theotheris"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_below="@id/benvenuto"
-        android:layout_marginTop="15dp"
-        android:text="A. è:" />
 
-    <TextView
-        android:id="@+id/theother_availability"
-        android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="5dp"
-        android:layout_below="@id/theotheris"
-        android:layout_alignParentLeft="true"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="..."
-        android:layout_toLeftOf="@id/callme_button"
-        android:background="#EEEEEE"/>
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_weight="2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <ImageButton
-        android:id="@id/callme_button"
-        android:layout_below="@id/theotheris"
-        android:layout_marginTop="1dp"
-        android:src="@drawable/callmebn"
-        android:scaleType="fitCenter"
-        android:onClick="callTheOther"
-        android:layout_alignParentRight="true"
-        android:layout_height="208dp"
-        android:layout_width="100dp">
-    </ImageButton>
+        <TextView
+            android:id="@+id/theotheris"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="15dp"
+            android:text="A. è:" />
 
-    <TextView
-        android:id="@+id/youare"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/theother_availability"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_marginTop="15dp"
-        android:text="Tu sei:" />
+        <TextView
+            android:id="@+id/theother_availability"
+            android:layout_width="0dp"
+            android:layout_marginTop = "4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_height="match_parent"
+            android:layout_below="@id/theotheris"
+            android:layout_alignParentLeft="true"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="..."
+            android:layout_toLeftOf="@id/callme_button"
+            android:background="#EEEEEE"/>
 
-    <TextView
-        android:id="@+id/my_availability"
-        android:layout_width="fill_parent"
-        android:layout_height="80dp"
-        android:layout_marginTop="5dp"
-        android:layout_below="@id/youare"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="..."
-        android:background="#EEEEEE"/>
+        <ImageButton
+            android:id="@id/callme_button"
+            android:layout_below="@id/theotheris"
+            android:src="@drawable/callmebn"
+            android:scaleType="fitCenter"
+            android:onClick="callTheOther"
+            android:layout_alignParentRight="true"
+            android:layout_height="match_parent"
+            android:layout_width="110dp">
+        </ImageButton>
+
+    </RelativeLayout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_weight="3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/youare"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginTop="15dp"
+            android:text="Tu sei:" />
+
+        <TextView
+            android:id="@+id/my_availability"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop = "4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_below="@id/youare"
+            android:layout_above="@+id/seekControls"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="..."
+            android:layout_toLeftOf="@+id/set_avail_btn"
+            android:layout_alignParentLeft="true"
+            android:background="#EEEEEE"/>
+
+        <Button
+            android:id="@+id/set_avail_btn"
+            android:layout_width="110dp"
+            android:layout_height="0dp"
+            android:text="@string/button_Imposta"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/youare"
+            android:layout_above="@+id/seekControls"/>
+
+        <LinearLayout
+            android:id="@+id/seekControls"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+
+            <SeekBar
+                android:id="@+id/seekHowManyHours1"
+                android:layout_height="35dp"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:max="4"
+                />
+
+            <Switch
+                android:id="@+id/telSmsSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:textOn="Tel"
+                android:textOff="Sms"
+                android:checked="true"/>
+
+        </LinearLayout>
+
+
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/version"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:layout_marginBottom="2dp"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Connecting to server..."
-        android:gravity="center_horizontal"
-        android:layout_alignParentBottom="true" />
-
-    <Button
-        android:id="@+id/set_my_availabitly"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:onClick="setMyAvailability"
-        android:layout_above="@id/version"
-        android:text="Imposta il tuo stato, Dana."/>
+        android:gravity="center_horizontal"/>
 
 
-</RelativeLayout>
+</LinearLayout>

@@ -22,7 +22,10 @@ public class Logic
     private static final String DANA_CELL = "+393355999621";
 
     public static final String PREFS_NAME = "MyPrefsFile";
-    public final static String TAG = "ALEDANA_LOG";
+    public static final  String TAG = "ALEDANA_LOG";
+
+    public static final int MIN_HOURS = 0;
+    public static final int MAX_HOURS = 5;
 
     private static Logic instance = null;
     private String username;
