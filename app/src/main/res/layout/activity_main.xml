@@ -45,6 +45,7 @@
 
         <ImageButton
             android:id="@id/callme_button"
+            android:contentDescription="Call or SMS"
             android:layout_below="@id/theotheris"
             android:src="@drawable/callmebn"
             android:scaleType="fitCenter"
@@ -57,7 +58,7 @@
     </RelativeLayout>
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_weight="3"
+        android:layout_weight="2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -76,21 +77,33 @@
             android:layout_marginTop = "4dp"
             android:layout_marginBottom="4dp"
             android:layout_below="@id/youare"
-            android:layout_above="@+id/seekControls"
+            android:layout_above="@id/editMessaggioOpzionale"
             android:gravity="center_vertical|center_horizontal"
             android:text="..."
             android:layout_toLeftOf="@+id/set_avail_btn"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:background="#EEEEEE"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/set_avail_btn"
+            android:contentDescription="Send"
             android:layout_width="110dp"
             android:layout_height="0dp"
-            android:text="@string/button_Imposta"
+            android:src="@drawable/doit"
+            android:scaleType="fitCenter"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/youare"
-            android:layout_above="@+id/seekControls"/>
+            android:layout_above="@id/editMessaggioOpzionale"
+            android:layout_below="@id/youare"/>
+
+        <EditText
+            android:id="@id/editMessaggioOpzionale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusableInTouchMode="true"
+            android:textSize="12sp"
+            android:hint="Messaggio opzionale..."
+            android:layout_above="@+id/seekControls"
+            android:layout_alignParentStart="true" />
 
         <LinearLayout
             android:id="@+id/seekControls"
@@ -103,8 +116,7 @@
                 android:layout_height="35dp"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
-                android:max="4"
-                />
+                android:max="4"/>
 
             <Switch
                 android:id="@+id/telSmsSwitch"
@@ -113,9 +125,7 @@
                 android:textOn="Tel"
                 android:textOff="Sms"
                 android:checked="true"/>
-
         </LinearLayout>
-
 
 
     </RelativeLayout>

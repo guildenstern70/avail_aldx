@@ -1,6 +1,7 @@
 package net.littlelite.aledana;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,13 +10,17 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -37,7 +42,9 @@ public class MainActivity extends Activity
     private int howManyHours;
 
     private static final int COLOR_GREEN = Color.parseColor("#00C853");
+    private static final int COLOR_LTGREEN = Color.parseColor("#48E18A");
     private static final int COLOR_YELLOW = Color.parseColor("#FFDE5C");
+    private static final int COLOR_LTYELLOW = Color.parseColor("#F9E594");
     private static final int COLOR_BLACK = Color.parseColor("#FFFFFF");
     private static final int COLOR_GRAY = Color.parseColor("#111111");
     private static final int COLOR_RED = Color.parseColor("#C62828");
@@ -49,8 +56,9 @@ public class MainActivity extends Activity
     private Switch swtSms;
     private TextView textViewToBeChanged;
     private TextView textViewToBeChanged2;
-    private Button btnSend;
+    private ImageButton btnSend;
     private SeekBar seekbar;
+    private EditText editMessaggioOpzionale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -61,15 +69,16 @@ public class MainActivity extends Activity
 
         this.theLogic = Logic.getInstance();
 
-        // Controls handles
+        // Controls handlers
         welcomeText = (TextView) findViewById(R.id.benvenuto);
         theOtherIsText = (TextView) findViewById(R.id.theotheris);
         callmeButton = (ImageButton) findViewById(R.id.callme_button);
         swtSms = (Switch) findViewById(R.id.telSmsSwitch);
         textViewToBeChanged = (TextView) findViewById(R.id.my_availability);
         textViewToBeChanged2 = (TextView) findViewById(R.id.theother_availability);
-        btnSend = (Button) findViewById(R.id.set_avail_btn);
+        btnSend = (ImageButton) findViewById(R.id.set_avail_btn);
         seekbar = (SeekBar) findViewById(R.id.seekHowManyHours1);
+        editMessaggioOpzionale = (EditText) findViewById(R.id.editMessaggioOpzionale);
 
         // Restore settings
         SharedPreferences settings = getSharedPreferences(Logic.PREFS_NAME, 0);
@@ -97,6 +106,10 @@ public class MainActivity extends Activity
         textViewToBeChanged2.setText("...");
         textViewToBeChanged2.setBackgroundColor(Color.LTGRAY);
 
+        seekbar.setProgress(0);
+        swtSms.setChecked(true);
+        this.setSendButtonVisible(false);
+
         // Get availability
         new GetAvailabilityTask().execute(theLogic.getUsername());
         new GetAvailabilityTask().execute(theLogic.getTheOther());
@@ -116,7 +129,6 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
@@ -125,9 +137,6 @@ public class MainActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         boolean result;
 
@@ -143,11 +152,6 @@ public class MainActivity extends Activity
                 result = true;
                 break;
 
-            case R.id.action_setup:
-                this.setMyAvailability(this.getCurrentFocus());
-                result = true;
-                break;
-
             default:
                 result = super.onOptionsItemSelected(item);
         }
@@ -160,21 +164,44 @@ public class MainActivity extends Activity
     {
         super.onStop();
 
-        // We need an Editor object to make preference changes.
-        // All objects are from android.context.Context
+        // Preferences
         SharedPreferences settings = getSharedPreferences(Logic.PREFS_NAME, 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("User", this.theLogic.getUsername());
-
-        // Commit the edits!
         editor.apply();
     }
 
     public void callTheOther(View view)
     {
-        Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + this.theLogic.getTheOtherPhone()));
-        this.startActivity(intent);
+        String tag = (String)callmeButton.getTag();
+        Intent intent = new Intent();
+
+        if (tag.equals("Phone"))
+        {
+            // Start a call
+            intent.setAction(Intent.ACTION_CALL);
+            intent.setData(Uri.parse("tel:" + this.theLogic.getTheOtherPhone()));
+        }
+        else
+        {
+            // Open WhatsApp
+            intent.setAction(Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_TEXT, "Ciao!");
+            intent.setType("text/plain");
+            intent.setPackage("com.whatsapp");
+        }
+
+        try
+        {
+            this.startActivity(intent);
+        }
+        catch (ActivityNotFoundException anex)
+        {
+            CharSequence text = "WhatsApp non trovato!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(getApplicationContext(), text, duration);
+            toast.show();
+        }
     }
 
     public void setMyAvailability(View view)
@@ -206,7 +233,7 @@ public class MainActivity extends Activity
         this.startActivity(intent);
     }
 
-    private void drawAvailability()
+    private void drawMyAvailability()
     {
         StringBuilder sb = new StringBuilder();
         String availType = "green";
@@ -237,10 +264,34 @@ public class MainActivity extends Activity
             sb = new StringBuilder("Non sono disponibile.");
         }
 
-        setAvailUI(availType, textViewToBeChanged, null);
+        this.setMyAvailUI(availType, true);
         textViewToBeChanged.setText(sb.toString());
-        btnSend.setEnabled(true);
+        this.setSendButtonVisible(true);
 
+    }
+
+    private void setSendButtonVisible(boolean isVisible)
+    {
+        int width;
+
+        if (isVisible)
+        {
+            width = 110;
+            this.btnSend.setVisibility(View.VISIBLE);
+            this.editMessaggioOpzionale.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            width = 0;
+            this.btnSend.setVisibility(View.INVISIBLE);
+            this.editMessaggioOpzionale.setVisibility(View.INVISIBLE);
+        }
+
+        ViewGroup.LayoutParams params = this.btnSend.getLayoutParams();
+        params.width = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, width,
+                            getResources().getDisplayMetrics());
+
+        this.btnSend.setLayoutParams(params);
     }
 
     private void initUI()
@@ -263,7 +314,7 @@ public class MainActivity extends Activity
         {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
-                drawAvailability();
+                drawMyAvailability();
             }
         });
 
@@ -280,6 +331,15 @@ public class MainActivity extends Activity
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar)
                     {
+                        setSendButtonVisible(true);
+                        if (swtSms.isChecked())
+                        {
+                            textViewToBeChanged.setBackgroundColor(COLOR_LTGREEN);
+                        }
+                        else
+                        {
+                            textViewToBeChanged.setBackgroundColor(COLOR_LTYELLOW);
+                        }
                     }
 
                     @Override
@@ -289,12 +349,44 @@ public class MainActivity extends Activity
                         // if progress = 13 -> value = 3 + (13 * 0.1) = 4.3
                         double value = Logic.MIN_HOURS + (progress * 1);
                         howManyHours = ((int) value);
-                        drawAvailability();
+                        drawMyAvailability();
                     }
                 }
         );
 
         callmeButton.setEnabled(false);
+        btnSend.setOnClickListener(
+                new Button.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        String availType = getAvailType();
+                        String availTime = Integer.valueOf(howManyHours).toString();
+                        String availMessage = "";
+
+                        Log.d(Logic.TAG, "Setting new availability... ");
+                        new SetAvailabilityTask().execute(availType.toLowerCase(), availTime, availMessage);
+                        refresh();
+                    }
+                }
+        );
+    }
+
+    private String getAvailType()
+    {
+        String availType = "Al telefono";
+
+        if (this.howManyHours == 0)
+        {
+            availType = "Non sono disponibile";
+        }
+        else if (!this.swtSms.isChecked())
+        {
+            availType = "SMS e WhatsApp";
+        }
+
+        return availType;
     }
 
     private class AvailabilityResult
@@ -348,42 +440,87 @@ public class MainActivity extends Activity
     /**
      *
      * @param uiType one of "green", "yellow", "red"
-     * @param textViewToBeChanged textView to be changed
-     * @param callme callme button
      */
-    private void setAvailUI(String uiType, TextView textViewToBeChanged, ImageButton callme)
+    private void setMyAvailUI(String uiType, boolean isChanging)
     {
+        TextView textView= textViewToBeChanged;
+
+        int colorGreen = COLOR_GREEN;
+        int colorYellow = COLOR_YELLOW;
+        if (isChanging)
+        {
+            colorGreen = COLOR_LTGREEN;
+            colorYellow = COLOR_LTYELLOW;
+        }
+
+        switch (uiType)
+        {
+            case "green":
+                textView.setTextColor(COLOR_BLACK);
+                textView.setBackgroundColor(colorGreen);
+                break;
+            case "yellow":
+                textView.setTextColor(COLOR_GRAY);
+                textView.setBackgroundColor(colorYellow);
+                break;
+            case "red":
+                textView.setTextColor(COLOR_LTGRAY);
+                textView.setBackgroundColor(COLOR_RED);
+                break;
+            default:
+                textView.setTextColor(COLOR_LTGRAY);
+                textView.setBackgroundColor(COLOR_GRAY);
+                break;
+        }
+
+    }
+
+    /**
+     *
+     * @param uiType one of "green", "yellow", "red"
+     */
+    private void setTheOtherAvailUI(String uiType)
+    {
+
+        TextView textView = this.textViewToBeChanged2;
 
         int imageId;
         boolean callEnabled;
+        String callMeTag = "?";
 
-        if (uiType.equals("green"))
+        switch (uiType)
         {
-            imageId = R.drawable.callme;
-            callEnabled = true;
-            textViewToBeChanged.setTextColor(COLOR_BLACK);
-            textViewToBeChanged.setBackgroundColor(COLOR_GREEN);
-        }
-        else if (uiType.equals("yellow"))
-        {
-            imageId = R.drawable.callmebn;
-            callEnabled = false;
-            textViewToBeChanged.setTextColor(COLOR_GRAY);
-            textViewToBeChanged.setBackgroundColor(COLOR_YELLOW);
-        }
-        else
-        {
-            imageId = R.drawable.callmebn;
-            callEnabled = false;
-            textViewToBeChanged.setTextColor(COLOR_LTGRAY);
-            textViewToBeChanged.setBackgroundColor(COLOR_RED);
+            case "green":
+                imageId = R.drawable.callme;
+                callEnabled = true;
+                callMeTag = "Phone";
+                textView.setTextColor(COLOR_BLACK);
+                textView.setBackgroundColor(COLOR_GREEN);
+                break;
+            case "yellow":
+                imageId = R.drawable.whatsapp;
+                callEnabled = true;
+                callMeTag = "WhatsApp";
+                textView.setTextColor(COLOR_GRAY);
+                textView.setBackgroundColor(COLOR_YELLOW);
+                break;
+            case "red":
+                imageId = R.drawable.callmebn;
+                callEnabled = false;
+                textView.setTextColor(COLOR_LTGRAY);
+                textView.setBackgroundColor(COLOR_RED);
+                break;
+            default:
+                imageId = R.drawable.callmebn;
+                callEnabled = false;
+                textView.setTextColor(COLOR_LTGRAY);
+                textView.setBackgroundColor(COLOR_GRAY);
+                break;
         }
 
-        if (callme != null)
-        {
-            callme.setImageResource(imageId);
-            callme.setEnabled(callEnabled);
-        }
+        this.callmeButton.setImageResource(imageId);
+        this.callmeButton.setEnabled(callEnabled);
+        this.callmeButton.setTag(callMeTag);
     }
 
     private class GetAvailabilityTask extends AsyncTask<String, Void, AvailabilityResult>
@@ -425,24 +562,23 @@ public class MainActivity extends Activity
         @Override
         protected void onPostExecute(AvailabilityResult result)
         {
-            TextView textViewToBeChanged = null;
+            TextView textView;
 
             if (result == null)
                 return;
 
-            ImageButton callme = (ImageButton) findViewById(R.id.callme_button);
             boolean isChangingMyAvailability = theLogic.getUsername().equals(this.userRequested);
 
             if (isChangingMyAvailability)
             {
-                textViewToBeChanged = (TextView) findViewById(R.id.my_availability);
+                textView = (TextView) findViewById(R.id.my_availability);
+                setMyAvailUI(result.getResultColor(), false);
             }
             else
             {
-                textViewToBeChanged = (TextView) findViewById(R.id.theother_availability);
+                textView = (TextView) findViewById(R.id.theother_availability);
+                setTheOtherAvailUI(result.getResultColor());
             }
-
-            setAvailUI(result.getResultColor(), textViewToBeChanged, callme);
 
             String text = result.getResultDescription();
             String remTime = result.getTimeLeft();
@@ -468,7 +604,7 @@ public class MainActivity extends Activity
                     }
                 }
             }
-            textViewToBeChanged.setText(text);
+            textView.setText(text);
 
         }
 
@@ -536,7 +672,11 @@ public class MainActivity extends Activity
                 {
                     availTime = availTime + " ore.";
                 }
-                CharSequence text = "Impostato: " + availType + " per " + availTime;
+                CharSequence text = "Impostato: " + availType;
+                if (!availType.startsWith("non"))
+                {
+                    text = text + " per " + availTime;
+                }
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();

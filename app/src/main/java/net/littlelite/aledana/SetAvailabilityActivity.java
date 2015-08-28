@@ -140,7 +140,6 @@ public class SetAvailabilityActivity extends Activity
             Log.e(Logic.TAG, "ERROR: Incorrect service params!!!");
         }
 
-
     }
 
     private void setActivityResult(String availType, String hours, String message)
