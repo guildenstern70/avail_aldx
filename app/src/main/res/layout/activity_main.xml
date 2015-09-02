@@ -34,26 +34,43 @@
             android:id="@+id/theother_availability"
             android:layout_width="0dp"
             android:layout_marginTop = "4dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="3dp"
             android:layout_height="match_parent"
             android:layout_below="@id/theotheris"
             android:layout_alignParentLeft="true"
             android:gravity="center_vertical|center_horizontal"
             android:text="..."
-            android:layout_toLeftOf="@id/callme_button"
+            android:layout_toLeftOf="@+id/buttons"
             android:background="#EEEEEE"/>
 
-        <ImageButton
-            android:id="@id/callme_button"
-            android:contentDescription="Call or SMS"
-            android:layout_below="@id/theotheris"
-            android:src="@drawable/callmebn"
-            android:scaleType="fitCenter"
-            android:onClick="callTheOther"
-            android:layout_alignParentRight="true"
-            android:layout_height="match_parent"
-            android:layout_width="110dp">
-        </ImageButton>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:id="@+id/buttons"
+                      android:layout_width="110dp"
+                      android:layout_height="match_parent"
+                      android:layout_below="@id/theotheris"
+                      android:layout_alignParentRight="true"
+                      android:orientation="vertical">
+
+            <ImageButton
+                android:id="@id/callme_button"
+                android:contentDescription="Call or SMS"
+                android:layout_weight="3"
+                android:layout_height="0dp"
+                android:layout_width="110dp"
+                android:src="@drawable/callmebn"
+                android:scaleType="fitCenter"
+                android:onClick="callTheOther"/>
+
+            <ToggleButton
+                android:id="@+id/show_message"
+                android:layout_weight="1"
+                android:layout_height="0dp"
+                android:layout_width="110dp"
+                android:textOn="..."
+                android:textOff="..."
+                android:scaleType="fitCenter"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 
@@ -99,6 +116,7 @@
             android:id="@id/editMessaggioOpzionale"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:singleLine="true"
             android:focusableInTouchMode="true"
             android:textSize="12sp"
             android:hint="Messaggio opzionale..."

@@ -7,6 +7,7 @@
     <string name="saro_disponibile">Disponibilità:</string>
     <string name="messaggio_opz">Messaggio (opzionale):</string>
     <string name="per_le_prox">per la prossima ora.</string>
+    <string name="mio_numero">Il mio numero di telefono è:</string>
     <string name="action_settings">Impostazioni</string>
     <string name="action_refresh">Aggiorna</string>
     <string name="title_activity_set_availability">Imposta la tua disponibilità</string>

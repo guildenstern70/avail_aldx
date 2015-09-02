@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,8 +13,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityRequest;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityResponse;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetPhoneNumberRequest;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetPhoneNumberResponse;
+
+import java.io.IOException;
 
 public class SettingsActivity extends Activity implements AdapterView.OnItemSelectedListener
 {
@@ -40,6 +51,9 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
         {
             textVersion.setText("AeD unknown version.");
         }
+
+        // Connect to server and show server version
+        new GetPhoneNumberTask().execute();
     }
 
     @Override
@@ -113,6 +127,41 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
     public void onNothingSelected(AdapterView<?> parent)
     {
         // Another interface callback
+    }
+
+    private class GetPhoneNumberTask extends AsyncTask<Void, Void, String>
+    {
+
+        @Override
+        protected String doInBackground(Void... objects)
+        {
+            String phoneNr = "?";
+            Log.d(Logic.TAG, "Trying to connect to server for phone nr...");
+            Aledanaapi apis = theLogic.buildRemoteServiceObject();
+
+            try
+            {
+                AledanaEndpointsGetPhoneNumberRequest request = new AledanaEndpointsGetPhoneNumberRequest();
+                request.setUsername(theLogic.getUsername());
+                AledanaEndpointsGetPhoneNumberResponse phone = apis.getphonenumber(request).execute();
+                phoneNr = phone.getResult();
+                Log.d(Logic.TAG, "Phone nr = " + phoneNr);
+            }
+            catch (IOException e)
+            {
+                Log.e(Logic.TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return phoneNr;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            EditText phoneNumber = (EditText) findViewById(R.id.txtNumCell);
+            phoneNumber.setText(result);
+        }
     }
 
 }

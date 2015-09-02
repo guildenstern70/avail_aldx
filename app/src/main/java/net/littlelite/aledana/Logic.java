@@ -1,16 +1,8 @@
 package net.littlelite.aledana;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.util.Log;
-
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.json.gson.GsonFactory;
-
-import java.io.IOException;
 
 
 /**

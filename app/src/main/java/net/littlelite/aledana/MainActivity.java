@@ -25,6 +25,7 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
@@ -59,6 +60,7 @@ public class MainActivity extends Activity
     private ImageButton btnSend;
     private SeekBar seekbar;
     private EditText editMessaggioOpzionale;
+    private ToggleButton showMessageToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -79,6 +81,7 @@ public class MainActivity extends Activity
         btnSend = (ImageButton) findViewById(R.id.set_avail_btn);
         seekbar = (SeekBar) findViewById(R.id.seekHowManyHours1);
         editMessaggioOpzionale = (EditText) findViewById(R.id.editMessaggioOpzionale);
+        showMessageToggle = (ToggleButton) findViewById(R.id.show_message);
 
         // Restore settings
         SharedPreferences settings = getSharedPreferences(Logic.PREFS_NAME, 0);
@@ -202,12 +205,6 @@ public class MainActivity extends Activity
             Toast toast = Toast.makeText(getApplicationContext(), text, duration);
             toast.show();
         }
-    }
-
-    public void setMyAvailability(View view)
-    {
-        Intent intent = new Intent(this, SetAvailabilityActivity.class);
-        this.startActivityForResult(intent, 10);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -361,16 +358,36 @@ public class MainActivity extends Activity
                     @Override
                     public void onClick(View v)
                     {
-                        String availType = getAvailType();
-                        String availTime = Integer.valueOf(howManyHours).toString();
-                        String availMessage = "";
+                        sendMyAvailability();
+                    }
+                }
+        );
 
-                        Log.d(Logic.TAG, "Setting new availability... ");
-                        new SetAvailabilityTask().execute(availType.toLowerCase(), availTime, availMessage);
+        showMessageToggle.setOnClickListener(
+                new ToggleButton.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
                         refresh();
                     }
                 }
         );
+    }
+
+    private void sendMyAvailability()
+    {
+        String availType = getAvailType();
+        String availTime = Integer.valueOf(howManyHours).toString();
+        String availMessage = "";
+        if (this.editMessaggioOpzionale.getText().length() > 0)
+        {
+            availMessage = this.editMessaggioOpzionale.getText().toString();
+        }
+
+        Log.d(Logic.TAG, "Setting new availability... ");
+        new SetAvailabilityTask().execute(availType.toLowerCase(), availTime, availMessage);
+        refresh();
     }
 
     private String getAvailType()
@@ -598,12 +615,26 @@ public class MainActivity extends Activity
                 {
                     if (!message.equals(""))
                     {
-                        text += "\n\n\"";
-                        text += message;
-                        text += "\"";
+                        showMessageToggle.setEnabled(true);
+                        if (showMessageToggle.isChecked())
+                        {
+                            text += "\n\n\"";
+                            text += message;
+                            text += "\"";
+                        }
+                        else
+                        {
+                            text += "...";
+                        }
+
+                    }
+                    else
+                    {
+                        showMessageToggle.setEnabled(false);
                     }
                 }
             }
+
             textView.setText(text);
 
         }
