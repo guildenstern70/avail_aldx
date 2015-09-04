@@ -10,8 +10,7 @@ import com.google.api.client.json.gson.GsonFactory;
  */
 public class Logic
 {
-    private static final String ALE_CELL = "+393484979839";
-    private static final String DANA_CELL = "+393355999621";
+    private String theOtherPhone;
 
     public static final String PREFS_NAME = "MyPrefsFile";
     public static final  String TAG = "ALEDANA_LOG";
@@ -24,6 +23,7 @@ public class Logic
 
     protected Logic()
     {
+        this.theOtherPhone = "?";
     }
 
     public static Logic getInstance()
@@ -49,10 +49,12 @@ public class Logic
 
     public String getTheOtherPhone()
     {
-        String theOtherPhone = ALE_CELL;
-        if (this.username.equals("Alessio"))
-            theOtherPhone = DANA_CELL;
-        return theOtherPhone;
+        return this.theOtherPhone;
+    }
+
+    public void setTheOtherPhone(String theOther)
+    {
+        this.theOtherPhone = theOther;
     }
 
     public void setUsername(String username)
@@ -68,5 +70,6 @@ public class Logic
         return builder.build();
 
     }
+
 }
 

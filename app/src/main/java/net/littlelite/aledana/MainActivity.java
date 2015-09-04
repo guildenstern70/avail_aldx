@@ -20,7 +20,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -40,6 +39,7 @@ public class MainActivity extends Activity
 {
 
     private Logic theLogic;
+    private AvailabilityResult lastAvailability;
     private int howManyHours;
 
     private static final int COLOR_GREEN = Color.parseColor("#00C853");
@@ -55,8 +55,8 @@ public class MainActivity extends Activity
     private TextView theOtherIsText;
     private ImageButton callmeButton;
     private Switch swtSms;
-    private TextView textViewToBeChanged;
-    private TextView textViewToBeChanged2;
+    private TextView textViewMyAvailability;
+    private TextView textViewTheOtherAvailability;
     private ImageButton btnSend;
     private SeekBar seekbar;
     private EditText editMessaggioOpzionale;
@@ -76,8 +76,8 @@ public class MainActivity extends Activity
         theOtherIsText = (TextView) findViewById(R.id.theotheris);
         callmeButton = (ImageButton) findViewById(R.id.callme_button);
         swtSms = (Switch) findViewById(R.id.telSmsSwitch);
-        textViewToBeChanged = (TextView) findViewById(R.id.my_availability);
-        textViewToBeChanged2 = (TextView) findViewById(R.id.theother_availability);
+        textViewMyAvailability = (TextView) findViewById(R.id.my_availability);
+        textViewTheOtherAvailability = (TextView) findViewById(R.id.theother_availability);
         btnSend = (ImageButton) findViewById(R.id.set_avail_btn);
         seekbar = (SeekBar) findViewById(R.id.seekHowManyHours1);
         editMessaggioOpzionale = (EditText) findViewById(R.id.editMessaggioOpzionale);
@@ -103,11 +103,11 @@ public class MainActivity extends Activity
 
     private void refresh()
     {
-        textViewToBeChanged.setText("...");
-        textViewToBeChanged.setBackgroundColor(Color.LTGRAY);
+        textViewMyAvailability.setText("...");
+        textViewMyAvailability.setBackgroundColor(Color.LTGRAY);
 
-        textViewToBeChanged2.setText("...");
-        textViewToBeChanged2.setBackgroundColor(Color.LTGRAY);
+        textViewTheOtherAvailability.setText("...");
+        textViewTheOtherAvailability.setBackgroundColor(Color.LTGRAY);
 
         seekbar.setProgress(0);
         swtSms.setChecked(true);
@@ -207,23 +207,6 @@ public class MainActivity extends Activity
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        String availType;
-        String availTime;
-        String availMessage;
-
-        if (requestCode == 10 && resultCode == RESULT_OK && data != null)
-        {
-            availType = data.getStringExtra("AVAIL_TYPE");
-            availTime = data.getStringExtra("AVAIL_HOURS");
-            availMessage = data.getStringExtra("AVAIL_MESSAGE");
-            new SetAvailabilityTask().execute(availType, availTime, availMessage);
-            this.refresh();
-        }
-
-    }
-
     private void goToSettings()
     {
         Intent intent = new Intent(this, SettingsActivity.class);
@@ -261,8 +244,8 @@ public class MainActivity extends Activity
             sb = new StringBuilder("Non sono disponibile.");
         }
 
-        this.setMyAvailUI(availType, true);
-        textViewToBeChanged.setText(sb.toString());
+        this.setMyAvailColor(availType, true);
+        textViewMyAvailability.setText(sb.toString());
         this.setSendButtonVisible(true);
 
     }
@@ -323,19 +306,24 @@ public class MainActivity extends Activity
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar)
                     {
+                        if (howManyHours == 0)
+                        {
+                            swtSms.setEnabled(false);
+                        }
                     }
 
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar)
                     {
                         setSendButtonVisible(true);
+                        swtSms.setEnabled(true);
                         if (swtSms.isChecked())
                         {
-                            textViewToBeChanged.setBackgroundColor(COLOR_LTGREEN);
+                            textViewMyAvailability.setBackgroundColor(COLOR_LTGREEN);
                         }
                         else
                         {
-                            textViewToBeChanged.setBackgroundColor(COLOR_LTYELLOW);
+                            textViewMyAvailability.setBackgroundColor(COLOR_LTYELLOW);
                         }
                     }
 
@@ -352,6 +340,8 @@ public class MainActivity extends Activity
         );
 
         callmeButton.setEnabled(false);
+        swtSms.setEnabled(false);
+
         btnSend.setOnClickListener(
                 new Button.OnClickListener()
                 {
@@ -369,7 +359,7 @@ public class MainActivity extends Activity
                     @Override
                     public void onClick(View v)
                     {
-                        refresh();
+                        displayMessage(false, textViewTheOtherAvailability);
                     }
                 }
         );
@@ -412,6 +402,7 @@ public class MainActivity extends Activity
         private String resultDescription;
         private String resultMessage;
         private String timeLeft;
+        private String theOtherPhone;
 
         public String getResultColor()
         {
@@ -452,15 +443,26 @@ public class MainActivity extends Activity
         {
             this.resultDescription = resultDescription;
         }
+
+        public String getTheOtherPhone()
+        {
+            return theOtherPhone;
+        }
+
+        public void setTheOtherPhone(String theOtherPhone)
+        {
+            this.theOtherPhone = theOtherPhone;
+        }
     }
 
     /**
      *
      * @param uiType one of "green", "yellow", "red"
+     * @param isChanging if I am changing my availability
      */
-    private void setMyAvailUI(String uiType, boolean isChanging)
+    private void setMyAvailColor(String uiType, boolean isChanging)
     {
-        TextView textView= textViewToBeChanged;
+        TextView textView= textViewMyAvailability;
 
         int colorGreen = COLOR_GREEN;
         int colorYellow = COLOR_YELLOW;
@@ -499,7 +501,7 @@ public class MainActivity extends Activity
     private void setTheOtherAvailUI(String uiType)
     {
 
-        TextView textView = this.textViewToBeChanged2;
+        TextView textView = this.textViewTheOtherAvailability;
 
         int imageId;
         boolean callEnabled;
@@ -566,6 +568,7 @@ public class MainActivity extends Activity
                 ar.setResultDescription(getAvailResponse.getAvailDescription());
                 ar.setResultMessage(getAvailResponse.getAvailMessage());
                 ar.setTimeLeft(getAvailResponse.getAvailTime());
+                ar.setTheOtherPhone(getAvailResponse.getTheotherPhone());
             }
             catch (IOException e)
             {
@@ -588,56 +591,71 @@ public class MainActivity extends Activity
 
             if (isChangingMyAvailability)
             {
-                textView = (TextView) findViewById(R.id.my_availability);
-                setMyAvailUI(result.getResultColor(), false);
+                textView = textViewMyAvailability;
+                setMyAvailColor(result.getResultColor(), false);
+                theLogic.setTheOtherPhone(result.getTheOtherPhone());
             }
             else
             {
-                textView = (TextView) findViewById(R.id.theother_availability);
+                textView = textViewTheOtherAvailability;
                 setTheOtherAvailUI(result.getResultColor());
             }
 
-            String text = result.getResultDescription();
-            String remTime = result.getTimeLeft();
-            String message = result.getResultMessage();
-            if (remTime != null)
-            {
-                if (!remTime.startsWith("-"))
-                {
-                    text += "\n";
-                    text += "Ancora per ";
-                    text += result.getTimeLeft().substring(0, 6);
-                }
-            }
-            if (message != null)
-            {
-                if (!isChangingMyAvailability)
-                {
-                    if (!message.equals(""))
-                    {
-                        showMessageToggle.setEnabled(true);
-                        if (showMessageToggle.isChecked())
-                        {
-                            text += "\n\n\"";
-                            text += message;
-                            text += "\"";
-                        }
-                        else
-                        {
-                            text += "...";
-                        }
+            lastAvailability = result;
+            displayMessage(isChangingMyAvailability, textView);
 
+        }
+
+    }
+
+    private void displayMessage(boolean isChangingMyAvailability, TextView textView)
+    {
+        if (this.lastAvailability == null)
+            return;
+
+        AvailabilityResult result = lastAvailability;
+        String text = result.getResultDescription();
+        String remTime = result.getTimeLeft();
+        String secret = result.getResultMessage();
+
+        if (remTime != null)
+        {
+            if (!remTime.startsWith("-"))
+            {
+                text += "\n";
+                text += "Ancora per ";
+                text += result.getTimeLeft().substring(0, 6);
+            }
+        }
+
+        if (secret != null)
+        {
+            if (!isChangingMyAvailability)
+            {
+                if (!secret.equals(""))
+                {
+                    showMessageToggle.setEnabled(true);
+                    if (showMessageToggle.isChecked())
+                    {
+                        text += "\n\n\"";
+                        text += secret;
+                        text += "\"";
                     }
                     else
                     {
-                        showMessageToggle.setEnabled(false);
+                        text += "...";
                     }
+
                 }
+                else
+                {
+                    showMessageToggle.setEnabled(false);
+                }
+
             }
-
-            textView.setText(text);
-
         }
+
+        textView.setText(text);
 
     }
 

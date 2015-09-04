@@ -26,7 +26,7 @@
         <item>4 ore</item>
     </string-array>
     <string name="title_activity_settings">Impostazioni</string>
-    <string name="tu_sei">Tu sei:</string>
+    <string name="tu_sei">Io sono:</string>
     <string-array name="tu_sei_array">
         <item>Dana</item>
         <item>Alessio</item>

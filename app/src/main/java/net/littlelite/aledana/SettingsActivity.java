@@ -1,28 +1,30 @@
 package net.littlelite.aledana;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityRequest;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityResponse;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetPhoneNumberRequest;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetPhoneNumberResponse;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetPhoneNumberRequest;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetPhoneNumberResponse;
 
 import java.io.IOException;
 
@@ -39,7 +41,23 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         this.theLogic = Logic.getInstance();
+        this.initUI();
+    }
+
+    private void refresh()
+    {
+        final EditText txtCell = (EditText)this.findViewById(R.id.txtNumCell);
+        new GetPhoneNumberTask().execute();
+        txtCell.setText("");
+    }
+
+    private void initUI()
+    {
+
+        // User: Ale o Dana
         this.initSpinners();
+
+        // Software Version
         TextView textVersion = (TextView)this.findViewById(R.id.textVersion);
         try
         {
@@ -52,8 +70,35 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
             textVersion.setText("AeD unknown version.");
         }
 
-        // Connect to server and show server version
-        new GetPhoneNumberTask().execute();
+        // Telephone number
+        final EditText txtCell = (EditText)this.findViewById(R.id.txtNumCell);
+
+        txtCell.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                txtCell.setText("");
+            }
+        });
+
+        txtCell.setOnEditorActionListener(new TextView.OnEditorActionListener()
+        {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event)
+            {
+                if (actionId == EditorInfo.IME_ACTION_DONE)
+                {
+                    txtCell.setEnabled(false);
+                    Log.d(TAG, "WebService SetPhoneNumber Launch ");
+                    new SetPhoneNumberTask().execute(txtCell.getText().toString());
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        this.refresh();
     }
 
     @Override
@@ -122,11 +167,59 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
 
         // Commit the edits!
         editor.apply();
+
+        this.refresh();
     }
 
     public void onNothingSelected(AdapterView<?> parent)
     {
         // Another interface callback
+    }
+
+    private class SetPhoneNumberTask extends AsyncTask<String, Void, Boolean>
+    {
+
+        @Override
+        protected Boolean doInBackground(String... objects)
+        {
+            Boolean result = false;
+            String phoneNr = objects[0];
+            Log.d(Logic.TAG, "Trying to connect to server for setting phone nr to " + phoneNr);
+
+            Aledanaapi apis = theLogic.buildRemoteServiceObject();
+
+            try
+            {
+                String currentUser = theLogic.getUsername();
+                AledanaEndpointsSetPhoneNumberRequest request = new AledanaEndpointsSetPhoneNumberRequest();
+                request.setPhone(phoneNr);
+                request.setUsername(currentUser);
+                AledanaEndpointsSetPhoneNumberResponse resultResp = apis.setphonenumber(request).execute();
+                Log.d(Logic.TAG, "Phone nr set to = " + phoneNr);
+                result = resultResp.getResult();
+            }
+            catch (IOException e)
+            {
+                Log.e(Logic.TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result)
+        {
+            EditText phoneNumber = (EditText) findViewById(R.id.txtNumCell);
+            phoneNumber.setEnabled(true);
+            Spinner spinner = (Spinner) findViewById(R.id.spinnerWho);
+            spinner.requestFocus();
+            Context context = getApplicationContext();
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, "Nr. di telefono impostato", duration);
+            toast.show();
+        }
+
     }
 
     private class GetPhoneNumberTask extends AsyncTask<Void, Void, String>
