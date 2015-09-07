@@ -49,6 +49,7 @@ public class MainActivity extends Activity
     private static final int COLOR_BLACK = Color.parseColor("#FFFFFF");
     private static final int COLOR_GRAY = Color.parseColor("#111111");
     private static final int COLOR_RED = Color.parseColor("#C62828");
+    private static final int COLOR_LTRED = Color.parseColor("#FA3E3E");
     private static final int COLOR_LTGRAY = Color.parseColor("#333333");
 
     private TextView welcomeText;
@@ -241,7 +242,7 @@ public class MainActivity extends Activity
         else
         {
             availType = "red";
-            sb = new StringBuilder("Non sono disponibile.");
+            sb = new StringBuilder("Non disponibile.");
         }
 
         this.setMyAvailColor(availType, true);
@@ -317,23 +318,16 @@ public class MainActivity extends Activity
                     {
                         setSendButtonVisible(true);
                         swtSms.setEnabled(true);
-                        if (swtSms.isChecked())
-                        {
-                            textViewMyAvailability.setBackgroundColor(COLOR_LTGREEN);
-                        }
-                        else
-                        {
-                            textViewMyAvailability.setBackgroundColor(COLOR_LTYELLOW);
-                        }
+                        editMessaggioOpzionale.setText("");
+                        howManyHours = Logic.MIN_HOURS + (seekBar.getProgress() * 1);
+                        drawMyAvailability();
                     }
 
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress,
                                                   boolean fromUser)
                     {
-                        // if progress = 13 -> value = 3 + (13 * 0.1) = 4.3
-                        double value = Logic.MIN_HOURS + (progress * 1);
-                        howManyHours = ((int) value);
+                        howManyHours = Logic.MIN_HOURS + (progress * 1);
                         drawMyAvailability();
                     }
                 }
@@ -386,7 +380,7 @@ public class MainActivity extends Activity
 
         if (this.howManyHours == 0)
         {
-            availType = "Non sono disponibile";
+            availType = "Non disponibile";
         }
         else if (!this.swtSms.isChecked())
         {
@@ -466,10 +460,13 @@ public class MainActivity extends Activity
 
         int colorGreen = COLOR_GREEN;
         int colorYellow = COLOR_YELLOW;
+        int colorRed = COLOR_RED;
+
         if (isChanging)
         {
             colorGreen = COLOR_LTGREEN;
             colorYellow = COLOR_LTYELLOW;
+            colorRed = COLOR_LTRED;
         }
 
         switch (uiType)
@@ -484,7 +481,7 @@ public class MainActivity extends Activity
                 break;
             case "red":
                 textView.setTextColor(COLOR_LTGRAY);
-                textView.setBackgroundColor(COLOR_RED);
+                textView.setBackgroundColor(colorRed);
                 break;
             default:
                 textView.setTextColor(COLOR_LTGRAY);

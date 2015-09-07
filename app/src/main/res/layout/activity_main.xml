@@ -8,10 +8,12 @@
 
     <TextView
         android:id="@+id/benvenuto"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="#333333"
         android:textStyle="italic"
+        android:textSize="12sp"
+        android:gravity="right"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Benvenuta, Dana!"
         />
@@ -27,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="5dp"
             android:text="A. è:" />
 
         <TextView
@@ -116,9 +118,11 @@
             android:id="@id/editMessaggioOpzionale"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:singleLine="true"
             android:focusableInTouchMode="true"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:hint="Messaggio opzionale..."
             android:layout_above="@+id/seekControls"
             android:layout_alignParentStart="true" />
