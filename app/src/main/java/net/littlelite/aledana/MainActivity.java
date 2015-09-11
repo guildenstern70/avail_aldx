@@ -6,9 +6,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -16,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -50,7 +53,7 @@ public class MainActivity extends Activity
     private static final int COLOR_GRAY = Color.parseColor("#111111");
     private static final int COLOR_RED = Color.parseColor("#C62828");
     private static final int COLOR_LTRED = Color.parseColor("#FA3E3E");
-    private static final int COLOR_LTGRAY = Color.parseColor("#333333");
+    private static final int COLOR_LTGRAY = Color.parseColor("#EEEEEE");
 
     private TextView welcomeText;
     private TextView theOtherIsText;
@@ -102,8 +105,10 @@ public class MainActivity extends Activity
 
     }
 
-    private void refresh()
+    private void setUIStandBy()
     {
+        // Set UI in waiting state...
+
         textViewMyAvailability.setText("...");
         textViewMyAvailability.setBackgroundColor(Color.LTGRAY);
 
@@ -112,6 +117,14 @@ public class MainActivity extends Activity
 
         seekbar.setProgress(0);
         swtSms.setChecked(true);
+
+    }
+
+    private void refresh()
+    {
+
+        // Set UI in waiting state...
+        this.setUIStandBy();
         this.setSendButtonVisible(false);
 
         // Get availability
@@ -239,10 +252,15 @@ public class MainActivity extends Activity
             sb.append("per la prossima ");
             sb.append("ora.");
         }
-        else
+        else if (howManyHours == 0)
         {
             availType = "red";
             sb = new StringBuilder("Non disponibile.");
+        }
+        else
+        {
+            availType = "gray";
+            sb = new StringBuilder("...");
         }
 
         this.setMyAvailColor(availType, true);
@@ -295,6 +313,7 @@ public class MainActivity extends Activity
         {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
+                Log.d(Logic.TAG, "SMS Check change...");
                 drawMyAvailability();
             }
         });
@@ -316,6 +335,8 @@ public class MainActivity extends Activity
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar)
                     {
+                        Log.d(Logic.TAG, "Seekbar start change...");
+
                         setSendButtonVisible(true);
                         swtSms.setEnabled(true);
                         editMessaggioOpzionale.setText("");
@@ -327,8 +348,12 @@ public class MainActivity extends Activity
                     public void onProgressChanged(SeekBar seekBar, int progress,
                                                   boolean fromUser)
                     {
-                        howManyHours = Logic.MIN_HOURS + (progress * 1);
-                        drawMyAvailability();
+                        Log.d(Logic.TAG, "Seekbar progress change...");
+                        if (fromUser)
+                        {
+                            howManyHours = Logic.MIN_HOURS + (progress * 1);
+                            drawMyAvailability();
+                        }
                     }
                 }
         );
@@ -370,8 +395,8 @@ public class MainActivity extends Activity
         }
 
         Log.d(Logic.TAG, "Setting new availability... ");
+        this.setUIStandBy();
         new SetAvailabilityTask().execute(availType.toLowerCase(), availTime, availMessage);
-        refresh();
     }
 
     private String getAvailType()
@@ -456,38 +481,46 @@ public class MainActivity extends Activity
      */
     private void setMyAvailColor(String uiType, boolean isChanging)
     {
-        TextView textView= textViewMyAvailability;
 
-        int colorGreen = COLOR_GREEN;
-        int colorYellow = COLOR_YELLOW;
-        int colorRed = COLOR_RED;
+        Log.d(Logic.TAG, "Setting My Avail = " + uiType);
+
+        TextView textView= textViewMyAvailability;
+        Drawable background;
+
+        int colorGreen = R.drawable.green_rounded;
+        int colorYellow = R.drawable.yellow_rounded;
+        int colorRed = R.drawable.red_rounded;
 
         if (isChanging)
         {
-            colorGreen = COLOR_LTGREEN;
-            colorYellow = COLOR_LTYELLOW;
-            colorRed = COLOR_LTRED;
+            colorGreen = R.drawable.light_green_rounded;
+            colorYellow = R.drawable.light_yellow_rounded;
+            colorRed = R.drawable.light_red_rounded;
         }
 
         switch (uiType)
         {
             case "green":
+                background = ContextCompat.getDrawable(this, colorGreen);
                 textView.setTextColor(COLOR_BLACK);
-                textView.setBackgroundColor(colorGreen);
                 break;
             case "yellow":
                 textView.setTextColor(COLOR_GRAY);
-                textView.setBackgroundColor(colorYellow);
+                background = ContextCompat.getDrawable(this, colorYellow);
                 break;
             case "red":
                 textView.setTextColor(COLOR_LTGRAY);
-                textView.setBackgroundColor(colorRed);
+                background = ContextCompat.getDrawable(this, colorRed);
                 break;
             default:
                 textView.setTextColor(COLOR_LTGRAY);
-                textView.setBackgroundColor(COLOR_GRAY);
+                background = ContextCompat.getDrawable(this, R.drawable.gray_rounded);
                 break;
         }
+
+        textView.setBackground(background);
+        textView.startAnimation(AnimationUtils.loadAnimation(this,
+                android.R.anim.fade_in));
 
     }
 
@@ -499,6 +532,7 @@ public class MainActivity extends Activity
     {
 
         TextView textView = this.textViewTheOtherAvailability;
+        Drawable background;
 
         int imageId;
         boolean callEnabled;
@@ -510,29 +544,33 @@ public class MainActivity extends Activity
                 imageId = R.drawable.callme;
                 callEnabled = true;
                 callMeTag = "Phone";
+                background = ContextCompat.getDrawable(this, R.drawable.green_rounded);
                 textView.setTextColor(COLOR_BLACK);
-                textView.setBackgroundColor(COLOR_GREEN);
                 break;
             case "yellow":
                 imageId = R.drawable.whatsapp;
                 callEnabled = true;
                 callMeTag = "WhatsApp";
                 textView.setTextColor(COLOR_GRAY);
-                textView.setBackgroundColor(COLOR_YELLOW);
+                background = ContextCompat.getDrawable(this, R.drawable.yellow_rounded);
                 break;
             case "red":
                 imageId = R.drawable.callmebn;
                 callEnabled = false;
                 textView.setTextColor(COLOR_LTGRAY);
-                textView.setBackgroundColor(COLOR_RED);
+                background = ContextCompat.getDrawable(this, R.drawable.red_rounded);
                 break;
             default:
                 imageId = R.drawable.callmebn;
                 callEnabled = false;
                 textView.setTextColor(COLOR_LTGRAY);
-                textView.setBackgroundColor(COLOR_GRAY);
+                background = ContextCompat.getDrawable(this, R.drawable.gray_rounded);
                 break;
         }
+
+        textView.setBackground(background);
+        textView.startAnimation(AnimationUtils.loadAnimation(this,
+                android.R.anim.fade_in));
 
         this.callmeButton.setImageResource(imageId);
         this.callmeButton.setEnabled(callEnabled);
@@ -582,6 +620,9 @@ public class MainActivity extends Activity
             TextView textView;
 
             if (result == null)
+                return;
+
+            if (result.getResultColor() == null)
                 return;
 
             boolean isChangingMyAvailability = theLogic.getUsername().equals(this.userRequested);
@@ -707,9 +748,10 @@ public class MainActivity extends Activity
         @Override
         protected void onPostExecute(Boolean result)
         {
+            Log.d(Logic.TAG, "Server responded with Availability...");
+
             if (result == Boolean.TRUE)
             {
-                Context context = getApplicationContext();
                 if (availTime.equals("1"))
                 {
                     availTime = "1 ora.";
@@ -723,14 +765,16 @@ public class MainActivity extends Activity
                 {
                     text = text + " per " + availTime;
                 }
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
+                Toast toast = Toast.makeText(getApplicationContext(),
+                                             text, Toast.LENGTH_SHORT);
                 toast.show();
             }
             else
             {
-                Log.e(Logic.TAG, "Somerthing weird has happened...");
+                Log.e(Logic.TAG, "Something weird has happened...");
             }
+
+            refresh();
 
         }
 

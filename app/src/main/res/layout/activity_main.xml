@@ -43,7 +43,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:text="..."
             android:layout_toLeftOf="@+id/buttons"
-            android:background="#EEEEEE"/>
+            android:background="@drawable/light_gray_rounded"/>
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                       android:id="@+id/buttons"
@@ -101,7 +101,7 @@
             android:text="..."
             android:layout_toLeftOf="@+id/set_avail_btn"
             android:layout_alignParentStart="true"
-            android:background="#EEEEEE"/>
+            android:background="@drawable/light_gray_rounded"/>
 
         <ImageButton
             android:id="@+id/set_avail_btn"

@@ -68,7 +68,6 @@ public class Logic
                 AndroidHttp.newCompatibleTransport(), new GsonFactory(), null);
         builder.setApplicationName("aledana-ep");
         return builder.build();
-
     }
 
 }
