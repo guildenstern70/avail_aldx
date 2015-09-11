@@ -32,6 +32,26 @@
             android:layout_marginTop="5dp"
             android:text="A. è:" />
 
+        <LinearLayout
+            android:id="@+id/theother_loading"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_below="@id/theotheris"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/buttons"
+            android:visibility="visible"
+            android:layout_marginTop = "4dp"
+            android:layout_marginBottom="3dp"
+            android:background="@drawable/light_gray_rounded"
+            >
+            <ProgressBar
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_gravity="center_vertical"
+                android:visibility="visible"
+                android:indeterminate="true" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/theother_availability"
             android:layout_width="0dp"
@@ -43,6 +63,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:text="..."
             android:layout_toLeftOf="@+id/buttons"
+            android:visibility="invisible"
             android:background="@drawable/light_gray_rounded"/>
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -89,6 +110,27 @@
             android:layout_marginTop="15dp"
             android:text="Tu sei:" />
 
+        <LinearLayout
+            android:id="@+id/my_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop = "4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_below="@id/youare"
+            android:layout_above="@id/editMessaggioOpzionale"
+            android:layout_toLeftOf="@+id/set_avail_btn"
+            android:layout_alignParentStart="true"
+            android:visibility="visible"
+            android:background="@drawable/light_gray_rounded"
+            >
+            <ProgressBar
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_gravity="center_vertical"
+                android:visibility="visible"
+                android:indeterminate="true" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/my_availability"
             android:layout_width="match_parent"
@@ -101,6 +143,7 @@
             android:text="..."
             android:layout_toLeftOf="@+id/set_avail_btn"
             android:layout_alignParentStart="true"
+            android:visibility="invisible"
             android:background="@drawable/light_gray_rounded"/>
 
         <ImageButton
@@ -123,7 +166,7 @@
             android:singleLine="true"
             android:focusableInTouchMode="true"
             android:textSize="14sp"
-            android:hint="Messaggio opzionale..."
+            android:hint="Messaggio..."
             android:layout_above="@+id/seekControls"
             android:layout_alignParentStart="true" />
 

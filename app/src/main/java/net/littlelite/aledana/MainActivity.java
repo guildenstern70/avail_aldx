@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -45,14 +46,8 @@ public class MainActivity extends Activity
     private AvailabilityResult lastAvailability;
     private int howManyHours;
 
-    private static final int COLOR_GREEN = Color.parseColor("#00C853");
-    private static final int COLOR_LTGREEN = Color.parseColor("#48E18A");
-    private static final int COLOR_YELLOW = Color.parseColor("#FFDE5C");
-    private static final int COLOR_LTYELLOW = Color.parseColor("#F9E594");
     private static final int COLOR_BLACK = Color.parseColor("#FFFFFF");
     private static final int COLOR_GRAY = Color.parseColor("#111111");
-    private static final int COLOR_RED = Color.parseColor("#C62828");
-    private static final int COLOR_LTRED = Color.parseColor("#FA3E3E");
     private static final int COLOR_LTGRAY = Color.parseColor("#EEEEEE");
 
     private TextView welcomeText;
@@ -65,6 +60,8 @@ public class MainActivity extends Activity
     private SeekBar seekbar;
     private EditText editMessaggioOpzionale;
     private ToggleButton showMessageToggle;
+    private LinearLayout panelTheOtherLoading;
+    private LinearLayout panelMyLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -86,6 +83,8 @@ public class MainActivity extends Activity
         seekbar = (SeekBar) findViewById(R.id.seekHowManyHours1);
         editMessaggioOpzionale = (EditText) findViewById(R.id.editMessaggioOpzionale);
         showMessageToggle = (ToggleButton) findViewById(R.id.show_message);
+        panelMyLoading = (LinearLayout) findViewById(R.id.my_loading);
+        panelTheOtherLoading = (LinearLayout) findViewById(R.id.theother_loading);
 
         // Restore settings
         SharedPreferences settings = getSharedPreferences(Logic.PREFS_NAME, 0);
@@ -109,11 +108,10 @@ public class MainActivity extends Activity
     {
         // Set UI in waiting state...
 
-        textViewMyAvailability.setText("...");
-        textViewMyAvailability.setBackgroundColor(Color.LTGRAY);
-
-        textViewTheOtherAvailability.setText("...");
-        textViewTheOtherAvailability.setBackgroundColor(Color.LTGRAY);
+        this.panelMyLoading.setVisibility(View.VISIBLE);
+        this.panelTheOtherLoading.setVisibility(View.VISIBLE);
+        this.textViewMyAvailability.setVisibility(View.INVISIBLE);
+        this.textViewTheOtherAvailability.setVisibility(View.INVISIBLE);
 
         seekbar.setProgress(0);
         swtSms.setChecked(true);
@@ -122,7 +120,6 @@ public class MainActivity extends Activity
 
     private void refresh()
     {
-
         // Set UI in waiting state...
         this.setUIStandBy();
         this.setSendButtonVisible(false);
@@ -484,7 +481,7 @@ public class MainActivity extends Activity
 
         Log.d(Logic.TAG, "Setting My Avail = " + uiType);
 
-        TextView textView= textViewMyAvailability;
+        TextView textView = textViewMyAvailability;
         Drawable background;
 
         int colorGreen = R.drawable.green_rounded;
@@ -517,6 +514,9 @@ public class MainActivity extends Activity
                 background = ContextCompat.getDrawable(this, R.drawable.gray_rounded);
                 break;
         }
+
+        this.panelMyLoading.setVisibility(View.INVISIBLE);
+        textView.setVisibility(View.VISIBLE);
 
         textView.setBackground(background);
         textView.startAnimation(AnimationUtils.loadAnimation(this,
@@ -567,6 +567,9 @@ public class MainActivity extends Activity
                 background = ContextCompat.getDrawable(this, R.drawable.gray_rounded);
                 break;
         }
+
+        this.panelTheOtherLoading.setVisibility(View.INVISIBLE);
+        textView.setVisibility(View.VISIBLE);
 
         textView.setBackground(background);
         textView.startAnimation(AnimationUtils.loadAnimation(this,
