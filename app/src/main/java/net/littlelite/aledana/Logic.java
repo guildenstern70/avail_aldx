@@ -6,7 +6,8 @@ import com.google.api.client.json.gson.GsonFactory;
 
 
 /**
- * Created by Alessio on 06/08/2015.
+ * Logic implementation
+ *
  */
 public class Logic
 {

@@ -8,8 +8,8 @@ android {
         applicationId "net.littlelite.aledana"
         minSdkVersion 18
         targetSdkVersion 22
-        versionCode 8
-        versionName "1.7.1"
+        versionCode 9
+        versionName "1.8"
         archivesBaseName = "AeD-$versionName"
     }
     buildTypes {

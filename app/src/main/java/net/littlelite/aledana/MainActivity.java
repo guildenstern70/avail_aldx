@@ -1,8 +1,8 @@
 package net.littlelite.aledana;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -96,11 +96,11 @@ public class MainActivity extends Activity
         // Connect to server and show server version
         new GetServerVersionTask().execute();
 
-        try
+        ActionBar actionBar = this.getActionBar();
+        if (actionBar != null)
         {
-            getActionBar().setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowTitleEnabled(false);
         }
-        catch (NullPointerException nx) {}
 
     }
 
@@ -171,6 +171,12 @@ public class MainActivity extends Activity
         }
 
         return result;
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        this.finish();
     }
 
     @Override
@@ -316,7 +322,7 @@ public class MainActivity extends Activity
         });
 
         // Seekbar: how many hours
-        seekbar.setMax((Logic.MAX_HOURS - Logic.MIN_HOURS) / 1);
+        seekbar.setMax(Logic.MAX_HOURS - Logic.MIN_HOURS);
         seekbar.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener()
                 {
@@ -337,7 +343,7 @@ public class MainActivity extends Activity
                         setSendButtonVisible(true);
                         swtSms.setEnabled(true);
                         editMessaggioOpzionale.setText("");
-                        howManyHours = Logic.MIN_HOURS + (seekBar.getProgress() * 1);
+                        howManyHours = Logic.MIN_HOURS + seekBar.getProgress();
                         drawMyAvailability();
                     }
 
@@ -348,7 +354,7 @@ public class MainActivity extends Activity
                         Log.d(Logic.TAG, "Seekbar progress change...");
                         if (fromUser)
                         {
-                            howManyHours = Logic.MIN_HOURS + (progress * 1);
+                            howManyHours = Logic.MIN_HOURS + progress;
                             drawMyAvailability();
                         }
                     }
@@ -515,12 +521,19 @@ public class MainActivity extends Activity
                 break;
         }
 
-        this.panelMyLoading.setVisibility(View.INVISIBLE);
-        textView.setVisibility(View.VISIBLE);
+        if (textView.getVisibility() == View.INVISIBLE)
+        {
+            this.panelMyLoading.setVisibility(View.INVISIBLE);
+            textView.setVisibility(View.VISIBLE);
+        }
 
         textView.setBackground(background);
-        textView.startAnimation(AnimationUtils.loadAnimation(this,
-                android.R.anim.fade_in));
+
+        if (!isChanging)
+        {
+            textView.startAnimation(AnimationUtils.loadAnimation(this,
+                    android.R.anim.fade_in));
+        }
 
     }
 
