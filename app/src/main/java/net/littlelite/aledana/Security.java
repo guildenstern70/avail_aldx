@@ -1,5 +1,7 @@
 package net.littlelite.aledana;
 
+import android.util.Log;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -36,9 +38,8 @@ public class Security
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH);
-        int day = cal.get((Calendar.DAY_OF_MONTH);
-        return (month*day*year*17);
+        int month = cal.get(Calendar.MONTH)+1;
+        return (month*year*17);
     }
 
     private static String getToken(int magicNumber)
@@ -63,9 +64,11 @@ public class Security
         return hashtext;
     }
 
-    public static void test()
+    public static String getSecurityToken()
     {
-        System.out.println("Magic Number: " + String.valueOf(getMagicNumber()));
-        System.out.println("Token: " + getToken(getMagicNumber()));
+        String sect = getToken(getMagicNumber());
+        Log.d(Logic.TAG, "Security code generated: "+sect);
+        return sect;
     }
+
 }

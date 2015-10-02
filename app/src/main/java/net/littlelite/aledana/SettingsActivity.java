@@ -6,12 +6,15 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -48,11 +51,21 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
     {
         final EditText txtCell = (EditText)this.findViewById(R.id.txtNumCell);
         new GetPhoneNumberTask().execute();
-        txtCell.setText("");
+        txtCell.setEnabled(false);
+        txtCell.setText("...checking...");
     }
 
     private void initUI()
     {
+
+        // Set statusbar color
+        if (Build.VERSION.SDK_INT >= 21)
+        {
+            Window window = this.getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.status_color));
+        }
 
         // User: Ale o Dana
         this.initSpinners();
@@ -191,11 +204,13 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
             try
             {
                 String currentUser = theLogic.getUsername();
-                AledanaEndpointsSetPhoneNumberRequest request = new AledanaEndpointsSetPhoneNumberRequest();
+                AledanaEndpointsSetPhoneNumberRequest request =
+                        new AledanaEndpointsSetPhoneNumberRequest();
                 request.setPhone(phoneNr);
                 request.setUsername(currentUser);
-                AledanaEndpointsSetPhoneNumberResponse resultResp = apis.setphonenumber(request).execute();
-                Log.d(Logic.TAG, "Phone nr set to = " + phoneNr);
+                request.setKey(Security.getSecurityToken());
+                AledanaEndpointsSetPhoneNumberResponse resultResp =
+                        apis.setphonenumber(request).execute();
                 result = resultResp.getResult();
             }
             catch (IOException e)
@@ -216,7 +231,16 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
             spinner.requestFocus();
             Context context = getApplicationContext();
             int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, "Nr. di telefono impostato", duration);
+            CharSequence text;
+            if (result)
+            {
+                text = "Nr. di telefono impostato";
+            }
+            else
+            {
+                text = "Errore di sicurezza (504)";
+            }
+            Toast toast = Toast.makeText(context, text, duration);
             toast.show();
         }
 
@@ -253,6 +277,7 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
         protected void onPostExecute(String result)
         {
             EditText phoneNumber = (EditText) findViewById(R.id.txtNumCell);
+            phoneNumber.setEnabled(true);
             phoneNumber.setText(result);
         }
     }

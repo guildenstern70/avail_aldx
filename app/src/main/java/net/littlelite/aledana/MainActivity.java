@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -18,6 +19,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -95,6 +98,16 @@ public class MainActivity extends Activity
 
         // Connect to server and show server version
         new GetServerVersionTask().execute();
+
+        // Set statusbar color
+        if (Build.VERSION.SDK_INT >= 21)
+        {
+            Window window = this.getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(this.getResources().getColor(R.color.status_color));
+        }
+
 
         ActionBar actionBar = this.getActionBar();
         if (actionBar != null)
@@ -720,6 +733,7 @@ public class MainActivity extends Activity
         private String availUser;
         private String availTime;
         private String availMessage;
+        private String key;
 
         @Override
         protected Boolean doInBackground(String... params)
@@ -732,11 +746,13 @@ public class MainActivity extends Activity
             availUser = theLogic.getUsername();
             availTime = params[1];
             availMessage = params[2];
+            key = Security.getSecurityToken();
 
             Log.d(Logic.TAG, "User = " + availUser);
             Log.d(Logic.TAG, "Type = " + availType);
             Log.d(Logic.TAG, "Time = " + availTime);
             Log.d(Logic.TAG, "Msg = " + availMessage);
+            Log.d(Logic.TAG, "Key = " + key);
 
             Aledanaapi apis = theLogic.buildRemoteServiceObject();
             AledanaEndpointsSetAvailabilityRequest request =
@@ -745,6 +761,7 @@ public class MainActivity extends Activity
             request.setUsername(availUser);
             request.setHours(availTime);
             request.setMessage(availMessage);
+            request.setKey(key);
 
             try
             {
@@ -764,6 +781,7 @@ public class MainActivity extends Activity
         @Override
         protected void onPostExecute(Boolean result)
         {
+            CharSequence text;
             Log.d(Logic.TAG, "Server responded with Availability...");
 
             if (result == Boolean.TRUE)
@@ -776,19 +794,21 @@ public class MainActivity extends Activity
                 {
                     availTime = availTime + " ore.";
                 }
-                CharSequence text = "Impostato: " + availType;
+                text = "Impostato: " + availType;
                 if (!availType.startsWith("non"))
                 {
                     text = text + " per " + availTime;
                 }
-                Toast toast = Toast.makeText(getApplicationContext(),
-                                             text, Toast.LENGTH_SHORT);
-                toast.show();
             }
             else
             {
+                text = "Errore di sicurezza (503)";
                 Log.e(Logic.TAG, "Something weird has happened...");
             }
+
+            Toast toast = Toast.makeText(getApplicationContext(),
+                    text, Toast.LENGTH_SHORT);
+            toast.show();
 
             refresh();
 
