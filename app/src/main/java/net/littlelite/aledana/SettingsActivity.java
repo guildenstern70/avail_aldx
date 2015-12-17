@@ -24,12 +24,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetPhoneNumberRequest;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetPhoneNumberResponse;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetPhoneNumberRequest;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetPhoneNumberResponse;
 
 import java.io.IOException;
+
 
 public class SettingsActivity extends Activity implements AdapterView.OnItemSelectedListener
 {
@@ -44,6 +46,10 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         this.theLogic = Logic.getInstance();
+
+        // Connect to server and show server version
+        new GetServerVersionTask().execute();
+
         this.initUI();
     }
 
@@ -69,19 +75,6 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
 
         // User: Ale o Dana
         this.initSpinners();
-
-        // Software Version
-        TextView textVersion = (TextView)this.findViewById(R.id.textVersion);
-        try
-        {
-            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-            String version = pInfo.versionName;
-            textVersion.setText(textVersion.getText().toString().replace("XYZ", version));
-        }
-        catch (PackageManager.NameNotFoundException nex)
-        {
-            textVersion.setText("AeD unknown version.");
-        }
 
         // Telephone number
         final EditText txtCell = (EditText)this.findViewById(R.id.txtNumCell);
@@ -279,6 +272,41 @@ public class SettingsActivity extends Activity implements AdapterView.OnItemSele
             EditText phoneNumber = (EditText) findViewById(R.id.txtNumCell);
             phoneNumber.setEnabled(true);
             phoneNumber.setText(result);
+        }
+    }
+
+    private class GetServerVersionTask extends AsyncTask<Void, Void, String>
+    {
+
+        @Override
+        protected String doInBackground(Void... objects)
+        {
+            String version = "UNKNOWN";
+            Log.d(Logic.TAG, "Trying to connect to server for version...");
+            Aledanaapi apis = theLogic.buildRemoteServiceObject();
+
+            try
+            {
+                AledanaEndpointsAliveResponse alive = apis.alive().execute();
+                version = alive.getServerVersion();
+                Log.d(Logic.TAG, "Connected to server v." + version);
+            }
+            catch (IOException e)
+            {
+                Log.e(Logic.TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
+
+            return version;
+        }
+
+        @Override
+        protected void onPostExecute(String result)
+        {
+            Log.d(Logic.TAG, "OK, connected to server.");
+            String version = "AeD Services API v. ";
+            TextView textVersion = (TextView)findViewById(R.id.textVersion);
+            textVersion.setText(version + result);
         }
     }
 

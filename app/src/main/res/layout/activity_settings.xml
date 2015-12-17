@@ -38,7 +38,7 @@
         android:id="@+id/textVersion"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="AeD version XYZ"
+        android:text="Connecting to server..."
         android:autoLink="web"
         android:layout_alignParentBottom="true"
         android:gravity="center_horizontal"/>

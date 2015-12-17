@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -34,9 +36,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.appspot.aledana_ep.aledanaapi.Aledanaapi;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsAliveResponse;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityRequest;
-import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAvailabilityResponse;
+import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsGetAllAvailabilitiesResponse;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetAvailabilityRequest;
 import com.appspot.aledana_ep.aledanaapi.model.AledanaEndpointsSetAvailabilityResponse;
 
@@ -46,8 +46,9 @@ public class MainActivity extends Activity
 {
 
     private Logic theLogic;
-    private AvailabilityResult lastAvailability;
     private int howManyHours;
+    private String secretMessage;
+    private boolean secretDisplayed;
 
     private static final int COLOR_BLACK = Color.parseColor("#FFFFFF");
     private static final int COLOR_GRAY = Color.parseColor("#111111");
@@ -96,9 +97,6 @@ public class MainActivity extends Activity
 
         Log.d(Logic.TAG, "Current user is " + this.theLogic.getUsername());
 
-        // Connect to server and show server version
-        new GetServerVersionTask().execute();
-
         // Set statusbar color
         if (Build.VERSION.SDK_INT >= 21)
         {
@@ -108,7 +106,6 @@ public class MainActivity extends Activity
             window.setStatusBarColor(this.getResources().getColor(R.color.status_color));
         }
 
-
         ActionBar actionBar = this.getActionBar();
         if (actionBar != null)
         {
@@ -117,10 +114,27 @@ public class MainActivity extends Activity
 
     }
 
+    private String getAeDVersion()
+    {
+        String versionText;
+
+        try
+        {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            versionText = pInfo.versionName;
+        }
+        catch (PackageManager.NameNotFoundException nex)
+        {
+            versionText = "AeD unknown version";
+        }
+
+        return versionText;
+
+    }
+
     private void setUIStandBy()
     {
         // Set UI in waiting state...
-
         this.panelMyLoading.setVisibility(View.VISIBLE);
         this.panelTheOtherLoading.setVisibility(View.VISIBLE);
         this.textViewMyAvailability.setVisibility(View.INVISIBLE);
@@ -138,8 +152,7 @@ public class MainActivity extends Activity
         this.setSendButtonVisible(false);
 
         // Get availability
-        new GetAvailabilityTask().execute(theLogic.getUsername());
-        new GetAvailabilityTask().execute(theLogic.getTheOther());
+        new GetAvailabilityTask().execute();
     }
 
     @Override
@@ -394,7 +407,7 @@ public class MainActivity extends Activity
                     @Override
                     public void onClick(View v)
                     {
-                        displayMessage(false, textViewTheOtherAvailability);
+                        displaySecret(textViewTheOtherAvailability);
                     }
                 }
         );
@@ -606,33 +619,33 @@ public class MainActivity extends Activity
         this.callmeButton.setTag(callMeTag);
     }
 
-    private class GetAvailabilityTask extends AsyncTask<String, Void, AvailabilityResult>
+    private class GetAvailabilityTask extends AsyncTask<Void, Void, AvailabilityResult[]>
     {
-
-        private String userRequested;
-
         @Override
-        protected AvailabilityResult doInBackground(String... params)
+        protected AvailabilityResult[] doInBackground(Void... params)
         {
-            String username = params[0];
             Log.d(Logic.TAG, "Trying to connect to server to get availability...");
-            Log.d(Logic.TAG, "username = " + username);
             Aledanaapi apis = theLogic.buildRemoteServiceObject();
-            AledanaEndpointsGetAvailabilityRequest request =
-                    new AledanaEndpointsGetAvailabilityRequest();
-            this.userRequested = username;
-            request.setUsername(this.userRequested);
-            AvailabilityResult ar = new AvailabilityResult();
+            AvailabilityResult[] results = new AvailabilityResult[]
+                    {
+                            new AvailabilityResult(),
+                            new AvailabilityResult()
+                    };
 
             try
             {
-                AledanaEndpointsGetAvailabilityResponse getAvailResponse =
-                        apis.getavailability(request).execute();
-                ar.setResultColor(getAvailResponse.getAvailColor());
-                ar.setResultDescription(getAvailResponse.getAvailDescription());
-                ar.setResultMessage(getAvailResponse.getAvailMessage());
-                ar.setTimeLeft(getAvailResponse.getAvailTime());
-                ar.setTheOtherPhone(getAvailResponse.getTheotherPhone());
+                AledanaEndpointsGetAllAvailabilitiesResponse getAllAvailResponse =
+                        apis.getall().execute();
+                results[0].setResultColor(getAllAvailResponse.getAvailAleColor());
+                results[0].setResultDescription(getAllAvailResponse.getAvailAleDescription());
+                results[0].setResultMessage(getAllAvailResponse.getAvailAleMessage());
+                results[0].setTimeLeft(getAllAvailResponse.getAvailAleTime());
+                results[0].setTheOtherPhone(getAllAvailResponse.getAlePhone());
+                results[1].setResultColor(getAllAvailResponse.getAvailDanaColor());
+                results[1].setResultDescription(getAllAvailResponse.getAvailDanaDescription());
+                results[1].setResultMessage(getAllAvailResponse.getAvailDanaMessage());
+                results[1].setTimeLeft(getAllAvailResponse.getAvailDanaTime());
+                results[1].setTheOtherPhone(getAllAvailResponse.getDanaPhone());
             }
             catch (IOException e)
             {
@@ -640,50 +653,86 @@ public class MainActivity extends Activity
                 e.printStackTrace();
             }
 
-            return ar;
+            return results;
         }
 
         @Override
-        protected void onPostExecute(AvailabilityResult result)
+        protected void onPostExecute(AvailabilityResult[] results)
         {
-            TextView textView;
+            Log.d(Logic.TAG, "Received results from server...");
 
-            if (result == null)
+            if (results == null)
                 return;
 
-            if (result.getResultColor() == null)
+            if (results.length != 2)
                 return;
 
-            boolean isChangingMyAvailability = theLogic.getUsername().equals(this.userRequested);
+            if (results[0].getResultColor() == null)
+                return;
 
-            if (isChangingMyAvailability)
+            int[] resultIndex = {1, 0};
+            if (theLogic.getUsername().equals("Alessio"))
             {
-                textView = textViewMyAvailability;
-                setMyAvailColor(result.getResultColor(), false);
-                theLogic.setTheOtherPhone(result.getTheOtherPhone());
-            }
-            else
-            {
-                textView = textViewTheOtherAvailability;
-                setTheOtherAvailUI(result.getResultColor());
+                resultIndex[0] = 0;
+                resultIndex[1] = 1;
             }
 
-            lastAvailability = result;
-            displayMessage(isChangingMyAvailability, textView);
+            secretMessage = results[resultIndex[1]].getResultMessage();
+            setMyAvailColor(results[resultIndex[0]].getResultColor(), false);
+            setTheOtherAvailUI(results[resultIndex[1]].getResultColor());
+            theLogic.setTheOtherPhone(results[resultIndex[0]].getTheOtherPhone());
+            displayMessage(textViewMyAvailability, results[resultIndex[0]]);
+            displayMessage(textViewTheOtherAvailability, results[resultIndex[1]]);
+            displaySecret(textViewTheOtherAvailability);
+
+            // Set version
+            TextView textVersion = (TextView)findViewById(R.id.version);
+            textVersion.setText("AeD version " + getAeDVersion());
 
         }
 
     }
 
-    private void displayMessage(boolean isChangingMyAvailability, TextView textView)
+    private void displaySecret(TextView textView)
     {
-        if (this.lastAvailability == null)
-            return;
+        String secret = secretMessage;
+        String text = textView.getText().toString();
 
-        AvailabilityResult result = lastAvailability;
+        if (secret != null && !secret.isEmpty())
+        {
+            showMessageToggle.setEnabled(true);
+            if (showMessageToggle.isChecked())
+            {
+                if (!secretDisplayed)
+                {
+                    text += "\n\n\"";
+                    text += secret;
+                    text += "\"";
+                }
+                secretDisplayed = true;
+            }
+            else
+            {
+                if (secretDisplayed)
+                {
+                    text = text.substring(0, text.length() - secret.length() - 4);
+                }
+                secretDisplayed = false;
+            }
+        }
+        else
+        {
+            showMessageToggle.setEnabled(false);
+        }
+
+        textView.setText(text);
+
+    }
+
+    private void displayMessage(TextView textView, AvailabilityResult result)
+    {
         String text = result.getResultDescription();
         String remTime = result.getTimeLeft();
-        String secret = result.getResultMessage();
 
         if (remTime != null)
         {
@@ -692,33 +741,6 @@ public class MainActivity extends Activity
                 text += "\n";
                 text += "Ancora per ";
                 text += result.getTimeLeft().substring(0, 6);
-            }
-        }
-
-        if (secret != null)
-        {
-            if (!isChangingMyAvailability)
-            {
-                if (!secret.equals(""))
-                {
-                    showMessageToggle.setEnabled(true);
-                    if (showMessageToggle.isChecked())
-                    {
-                        text += "\n\n\"";
-                        text += secret;
-                        text += "\"";
-                    }
-                    else
-                    {
-                        text += "...";
-                    }
-
-                }
-                else
-                {
-                    showMessageToggle.setEnabled(false);
-                }
-
             }
         }
 
@@ -816,38 +838,4 @@ public class MainActivity extends Activity
 
     }
 
-    private class GetServerVersionTask extends AsyncTask<Void, Void, String>
-    {
-
-        @Override
-        protected String doInBackground(Void... objects)
-        {
-            String version = "UNKNOWN";
-            Log.d(Logic.TAG, "Trying to connect to server for version...");
-            Aledanaapi apis = theLogic.buildRemoteServiceObject();
-
-            try
-            {
-                AledanaEndpointsAliveResponse alive = apis.alive().execute();
-                version = alive.getServerVersion();
-                Log.d(Logic.TAG, "Connected to server v." + version);
-            }
-            catch (IOException e)
-            {
-                Log.e(Logic.TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-
-            return version;
-        }
-
-        @Override
-        protected void onPostExecute(String result)
-        {
-            Log.d(Logic.TAG, "OK, connected to server.");
-            TextView versionText = (TextView) findViewById(R.id.version);
-            String version = "AeD Services API v. ";
-            versionText.setText(version + result);
-        }
-    }
 }

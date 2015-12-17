@@ -21,11 +21,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SetAvailabilityActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_set_availability" >
-        </activity>
-        <activity
             android:name=".SettingsActivity"
             android:screenOrientation="portrait"
             android:label="@string/title_activity_settings"

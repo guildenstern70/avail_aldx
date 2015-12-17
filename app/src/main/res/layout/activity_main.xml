@@ -179,7 +179,7 @@
                 android:layout_height="35dp"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
-                android:max="4"/>
+                android:max="8"/>
 
             <Switch
                 android:id="@+id/telSmsSwitch"

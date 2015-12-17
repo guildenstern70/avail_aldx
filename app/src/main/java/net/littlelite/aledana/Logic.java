@@ -17,7 +17,7 @@ public class Logic
     public static final  String TAG = "ALEDANA_LOG";
 
     public static final int MIN_HOURS = 0;
-    public static final int MAX_HOURS = 5;
+    public static final int MAX_HOURS = 10;
 
     private static Logic instance = null;
     private String username;
