@@ -41,13 +41,6 @@ public class Logic
         return this.username;
     }
 
-    public String getTheOther()
-    {
-        if (this.username.equals("Alessio"))
-            return "Dana";
-        return "Alessio";
-    }
-
     public String getTheOtherPhone()
     {
         return this.theOtherPhone;
